@@ -1,0 +1,132 @@
+/* ===== Outer ===== */
+.bn3-outer {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 56px 24px 64px;
+}
+
+/* ===== Header ===== */
+.bn3-header {
+  margin-bottom: 24px;
+}
+
+.bn3-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: #f05353;
+  margin: 0 0 4px;
+}
+
+.bn3-title {
+  font-size: 28px;
+  font-weight: 900;
+  color: #0a0a0a;
+  margin: 0;
+}
+
+/* ===== Grid ===== */
+.bn3-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+
+/* ===== Card ===== */
+.bn3-card {
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  cursor: default;
+}
+
+.bn3-img-wrap {
+  width: 100%;
+  height: 220px;
+  position: relative;
+  overflow: hidden;
+}
+
+.bn3-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.bn3-card:hover .bn3-img {
+  transform: scale(1.06);
+}
+
+.bn3-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.05) 0%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+  transition: background 0.3s ease;
+}
+
+.bn3-card:hover .bn3-overlay {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.1) 0%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+}
+
+/* ===== Info ===== */
+.bn3-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 1;
+}
+
+.bn3-cat {
+  font-size: 14px;
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.bn3-desc {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 900px) {
+  .bn3-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .bn3-outer {
+    padding: 40px 16px 48px;
+  }
+
+  .bn3-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .bn3-img-wrap {
+    height: 180px;
+  }
+
+  .bn3-title {
+    font-size: 22px;
+  }
+}

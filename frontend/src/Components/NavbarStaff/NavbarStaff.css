@@ -1,0 +1,90 @@
+.navbar-staff {
+    display: flex;
+    align-items: center; 
+    justify-content: space-between;
+    padding: 15px 60px;
+    box-shadow: 0 1px 3px -2px #000;
+    margin-bottom: 1px;
+    background: white;
+}
+.nav-logo-profile-logout { 
+    display: flex;
+    align-items: center;
+}
+
+.nav-logo {
+    width: 200px;
+}
+
+.nav-profile {
+    width: 70px; 
+    height: auto; 
+    margin-left: 10px; 
+}
+
+.logout-button {
+    background-color: #f44336; 
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-left: 20px; /* Thêm margin trái để tạo khoảng cách với profile */
+}
+
+.logout-button:hover {
+    background-color: #c62828; 
+}
+
+.navbar-staff a { /* Kiểu cho liên kết "Xem đơn hàng" */
+    margin-right: 20px; /* Điều chỉnh khoảng cách nếu cần */
+    color: #000000; /* Màu chữ */
+    text-decoration: none;
+    font-size: 18px; /* Tăng kích thước chữ */
+    font-weight: bold; /* Đậm hơn để dễ nhìn */
+    padding: 10px 15px; /* Thêm khoảng đệm bên trong */
+    border-radius: 5px; /* Bo góc để tạo cảm giác mềm mại */
+    transition: background-color 0.3s ease; /* Thêm hiệu ứng chuyển động khi hover */
+}
+
+.navbar-staff a:hover { 
+    text-decoration: underline;
+    background-color: #bdbdbd; /* Thay đổi màu nền khi hover */
+}
+
+/* Trong NavbarStaff.css */
+.navbar-staff span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    color: #333;
+    transition: color 0.3s;
+}
+
+.navbar-staff span:hover {
+    color: #007bff;
+}
+
+.nav-icon {
+    width: 20px;
+    height: 20px;
+}
+
+/* Thêm style cho active link */
+.navbar-staff .active span {
+    color: #007bff;
+    font-weight: 600;
+}
+
+@media(max-width:800px){
+    .navbar-admin {
+        padding: 15px 30px;
+    }
+    .nav-logo{
+        width: 150px;
+    }
+    .nav-profile{
+        width: 60px;
+    }
+}

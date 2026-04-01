@@ -1,0 +1,148 @@
+/* ============================================================
+   STATISTIC PAGE — Dark Premium Sports Store Design
+   ============================================================ */
+
+.statistic-page {
+  width: 100%;
+  padding: 0;
+}
+
+.stat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.stat-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stat-title-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(249, 115, 22, 0.1);
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f97316;
+}
+
+.stat-title h1 {
+  font-size: 24px;
+  font-weight: 800;
+  color: #e2e8f0;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.stat-charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.stat-chart-card {
+  background: #1e293b;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 22px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.stat-chart-card.full-width {
+  grid-column: 1 / -1;
+}
+
+.stat-chart-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.stat-chart-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(249, 115, 22, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f97316;
+  flex-shrink: 0;
+}
+
+.stat-chart-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin: 0;
+}
+
+/* Recharts overrides for dark theme */
+.stat-chart-card .recharts-cartesian-axis-tick-value {
+  fill: #64748b;
+  font-size: 11px;
+}
+
+.stat-chart-card .recharts-cartesian-grid line {
+  stroke: rgba(255, 255, 255, 0.04);
+}
+
+.stat-chart-card .recharts-tooltip-wrapper {
+  outline: none;
+}
+
+.stat-chart-card .recharts-default-tooltip {
+  background: #0f172a !important;
+  border: 1px solid rgba(249, 115, 22, 0.2) !important;
+  border-radius: 10px !important;
+  padding: 10px 14px !important;
+}
+
+.stat-chart-card .recharts-tooltip-label {
+  color: #94a3b8 !important;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.stat-chart-card .recharts-tooltip-item {
+  color: #e2e8f0 !important;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.stat-chart-card .recharts-legend-item-text {
+  color: #94a3b8 !important;
+  font-size: 12px;
+}
+
+.stat-chart-card .recharts-surface {
+  overflow: visible;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .stat-charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-chart-card.full-width {
+    grid-column: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .stat-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

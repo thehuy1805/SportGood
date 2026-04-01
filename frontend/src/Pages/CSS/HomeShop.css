@@ -1,0 +1,109 @@
+/* ============================================================
+   HOME SHOP (/shop) — cùng layout & sidebar tối như Men / Women / Sport
+   ============================================================ */
+
+.home-shop-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.shop-home-layout {
+  display: flex;
+  margin-top: 24px;
+  min-height: calc(100vh - 200px);
+  max-width: 1400px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 40px;
+  box-sizing: border-box;
+}
+
+/* ---------- Sidebar (giống .sidebar-men) ---------- */
+.sidebar-shop {
+  width: 280px;
+  min-width: 280px;
+  margin-right: 24px;
+  background: var(--nav-bg);
+  border-radius: 16px;
+  padding: 20px 16px;
+  border: 1px solid var(--nav-border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: sticky;
+  top: 88px;
+  align-self: flex-start;
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(249, 115, 22, 0.3) transparent;
+  flex-shrink: 0;
+}
+
+.sidebar-shop::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-shop::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-shop::-webkit-scrollbar-thumb {
+  background: rgba(249, 115, 22, 0.3);
+  border-radius: 4px;
+}
+
+.shop-home-main {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 1280px) {
+  .shop-home-layout {
+    padding: 0 32px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .shop-home-layout {
+    padding: 0 24px;
+  }
+}
+
+@media (max-width: 900px) {
+  .shop-home-layout {
+    flex-direction: column;
+  }
+
+  .sidebar-shop {
+    width: 100%;
+    min-width: unset;
+    margin-right: 0;
+    position: static;
+    max-height: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 14px;
+  }
+
+  .sidebar-shop .sidebar-section {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 200px;
+  }
+
+  .sidebar-shop .sidebar-section-body {
+    max-height: 300px;
+  }
+}
+
+@media (max-width: 600px) {
+  .sidebar-shop {
+    display: none;
+  }
+
+  .shop-home-layout {
+    padding: 0 12px;
+  }
+}

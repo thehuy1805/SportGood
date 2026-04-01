@@ -1,0 +1,16 @@
+{
+    "prettier.embeddedLanguageFormatting": "off",
+    "prettier.enable": false,
+    "prettier.endOfLine": "crlf",
+    "editor.formatOnSave": false,
+    "editor.formatOnSaveMode": "modifications",
+    "javascript.format.enable": false,
+    "[javascript]": {
+        "editor.defaultFormatter": null,
+        "editor.formatOnSave": false
+    },
+    "[javascriptreact]": {
+        "editor.formatOnSave": false
+    },
+    "prettier.disableLanguages": ["javascript", "javascriptreact"]
+}

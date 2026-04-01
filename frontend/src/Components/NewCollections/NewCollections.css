@@ -1,0 +1,124 @@
+/* ===== Outer ===== */
+.nc-outer {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 56px 24px 64px;
+}
+
+/* ===== Header ===== */
+.nc-header {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  margin-bottom: 36px;
+}
+
+.nc-number {
+  font-size: 64px;
+  font-weight: 900;
+  color: rgba(0, 0, 0, 0.06);
+  line-height: 1;
+  user-select: none;
+  min-width: 80px;
+}
+
+.nc-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nc-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: #f05353;
+  margin: 0;
+}
+
+.nc-title {
+  font-size: 32px;
+  font-weight: 900;
+  color: #0a0a0a;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.nc-desc {
+  font-size: 14px;
+  color: #999;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* ===== Grid ===== */
+.nc-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+/* ===== Footer Button ===== */
+.nc-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.nc-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 32px;
+  background: #0a0a0a;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.nc-btn:hover {
+  background: #f05353;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(240, 83, 83, 0.35);
+}
+
+.nc-btn-arrow {
+  font-size: 16px;
+  transition: transform 0.25s ease;
+}
+
+.nc-btn:hover .nc-btn-arrow {
+  transform: translateX(4px);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1100px) {
+  .nc-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 800px) {
+  .nc-outer {
+    padding: 40px 16px 48px;
+  }
+
+  .nc-title {
+    font-size: 26px;
+  }
+
+  .nc-number {
+    font-size: 48px;
+    min-width: 60px;
+  }
+
+  .nc-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}

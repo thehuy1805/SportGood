@@ -1,0 +1,65 @@
+.size-guide-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f5f5f5;
+  }
+  
+  .size-guide-container h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+  }
+  
+  .size-tables-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  
+  .size-table {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+  
+  .size-table h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+  }
+  
+  .size-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .size-table th {
+    background-color: #3498db;
+    color: white;
+    padding: 10px;
+    text-align: left;
+  }
+  
+  .size-table td {
+    padding: 10px;
+    border-bottom: 1px solid #ecf0f1;
+  }
+  
+  .size-table tr:nth-child(even) {
+    background-color: #f8f9fa;
+  }
+  
+  .size-table tr:hover {
+    background-color: #e9ecef;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .size-tables-grid {
+      grid-template-columns: 1fr;
+    }
+  }

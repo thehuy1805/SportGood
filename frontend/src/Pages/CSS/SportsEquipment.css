@@ -1,0 +1,172 @@
+/* ============================================================
+   SPORTS EQUIPMENT PAGE — Premium Dark Sidebar Design
+   ============================================================ */
+
+.sportsEquipment-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.sportsEquipment-banner {
+  max-width: 100%;
+  height: auto;
+  display: contents;
+}
+
+.sportsEquipment-content {
+  display: flex;
+  margin-top: 24px;
+  min-height: calc(100vh - 200px);
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar-sportsEquipment {
+  width: 280px;
+  min-width: 280px;
+  margin-right: 24px;
+  background: var(--nav-bg);
+  border-radius: 16px;
+  padding: 20px 16px;
+  border: 1px solid var(--nav-border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: sticky;
+  top: 88px;
+  align-self: flex-start;
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(249, 115, 22, 0.3) transparent;
+}
+
+.sidebar-sportsEquipment::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-sportsEquipment::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-sportsEquipment::-webkit-scrollbar-thumb {
+  background: rgba(249, 115, 22, 0.3);
+  border-radius: 4px;
+}
+
+/* ---------- Section Card ---------- */
+.sidebar-section {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 14px 16px;
+  transition: border-color 0.25s ease;
+}
+
+.sidebar-section:hover {
+  border-color: rgba(249, 115, 22, 0.2);
+}
+
+/* ---------- Section Header ---------- */
+.sidebar-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.sidebar-section-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(249, 115, 22, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--nav-accent);
+  flex-shrink: 0;
+  transition: background 0.25s ease;
+}
+
+.sidebar-section:hover .sidebar-section-icon {
+  background: rgba(249, 115, 22, 0.2);
+}
+
+.sidebar-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #e2e8f0;
+  text-transform: uppercase;
+  flex: 1;
+}
+
+.sidebar-section-arrow {
+  color: var(--nav-text-muted);
+  transition: transform 0.25s ease, color 0.25s ease;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-section.collapsed .sidebar-section-arrow {
+  transform: rotate(-90deg);
+  color: var(--nav-accent);
+}
+
+/* ---------- Section Body ---------- */
+.sidebar-section-body {
+  overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+  max-height: 400px;
+  opacity: 1;
+}
+
+.sidebar-section.collapsed .sidebar-section-body {
+  max-height: 0;
+  opacity: 0;
+}
+
+/* ---------- Main Content ---------- */
+.main-content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .sportsEquipment-content {
+    flex-direction: column;
+  }
+
+  .sidebar-sportsEquipment {
+    width: 100%;
+    min-width: unset;
+    margin-right: 0;
+    position: static;
+    max-height: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 14px;
+  }
+
+  .sidebar-section {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 200px;
+  }
+
+  .sidebar-section-body {
+    max-height: 300px;
+  }
+}
+
+@media (max-width: 500px) {
+  .sidebar-sportsEquipment {
+    padding: 10px;
+    gap: 6px;
+  }
+
+  .sidebar-section {
+    flex: 1 1 100%;
+  }
+}

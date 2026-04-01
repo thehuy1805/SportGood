@@ -1,0 +1,89 @@
+.sort-section .sidebar-section-body {
+  padding-top: 14px;
+}
+
+.sort-body-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sort-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  color: rgba(148, 163, 184, 0.7);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.sort-select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sort-select {
+  width: 100%;
+  padding: 9px 36px 9px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  appearance: none;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+.sort-select:focus {
+  border-color: rgba(249, 115, 22, 0.5);
+  background-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+.sort-select option {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+.sort-select-arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--nav-text-muted);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.reset-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 16px;
+  background: rgba(248, 113, 113, 0.1);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  margin-top: 4px;
+  letter-spacing: 0.3px;
+}
+
+.reset-button:hover {
+  background: rgba(248, 113, 113, 0.18);
+  border-color: rgba(248, 113, 113, 0.4);
+  transform: translateY(-1px);
+}
+
+.reset-button:active {
+  transform: translateY(0);
+}
