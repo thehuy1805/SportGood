@@ -10,6 +10,7 @@
         const nodemailer = require('nodemailer');
         const http = require('http');
         const socketIo = require('socket.io');
+        const fetch = require('node-fetch');
         const Message = require('./models/Message');
 
     const server = http.createServer(app);
@@ -1513,33 +1514,34 @@ app.post('/checkout', fetchUser, async (req, res) => {
 
 
 
-    // Schema cho Feedback
+    // Schema cho Feedback (đã thêm trường isVisible để admin kiểm duyệt)
     const Feedback = mongoose.model("Feedback", {
-        productId: { 
-            type: Number, 
-            required: true 
+        productId: {
+            type: Number,
+            required: true
         },
-        userId: { 
-            type: mongoose.Schema.Types.ObjectId, 
-            ref: 'Users', 
-            required: true 
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Users',
+            required: true
         },
-        userName: { 
-            type: String, 
-            required: true 
+        userName: {
+            type: String,
+            required: true
         },
-        rating: { 
-            type: Number, 
-            required: true 
+        rating: {
+            type: Number,
+            required: true
         },
-        content: { 
-            type: String, 
-            required: true 
+        content: {
+            type: String,
+            required: true
         },
-        date: { 
-            type: Date, 
-            default: Date.now 
-        }
+        date: {
+            type: Date,
+            default: Date.now
+        },
+        isVisible: { type: Boolean, default: true }  // Admin ẩn review spam/inappropriate
     });
 
     // API thêm feedback mới
@@ -1550,10 +1552,11 @@ app.post('/checkout', fetchUser, async (req, res) => {
 
             const newFeedback = new Feedback({
                 productId,
-                userId: req.user.id, // Lưu trữ userId
-                userName: userName.name, // Lưu trữ userName
+                userId: req.user.id,
+                userName: userName.name,
                 rating,
-                content
+                content,
+                isVisible: true  // Mới tạo mặc định hiển thị
             });
 
             await newFeedback.save();
@@ -1564,11 +1567,11 @@ app.post('/checkout', fetchUser, async (req, res) => {
         }
     });
 
-    // API lấy danh sách feedback theo productId
+    // API lấy danh sách feedback theo productId (chỉ hiển thị review đã được duyệt)
     app.get('/get-feedbacks/:productId', async (req, res) => {
         try {
             const productId = req.params.productId;
-            const feedbacks = await Feedback.find({ productId });
+            const feedbacks = await Feedback.find({ productId, isVisible: true }).sort({ date: -1 });
             res.json(feedbacks);
         } catch (error) {
             console.error('Lỗi khi lấy danh sách feedback:', error);
@@ -1576,6 +1579,147 @@ app.post('/checkout', fetchUser, async (req, res) => {
         }
     });
 
+
+// ============================================================
+// ADMIN: TỒN KHO THẤP & KIỂM DUYỆT REVIEW
+// ============================================================
+
+// Lấy tất cả sản phẩm có tồn kho thấp (low_stock hoặc out_of_stock)
+const LOW_STOCK_THRESHOLD = parseInt(process.env.LOW_STOCK_THRESHOLD, 10) || 5;
+
+app.get('/api/admin/low-stock-alerts', fetchUser, async (req, res) => {
+    try {
+        if (req.user.role === 'user') {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+
+        const products = await Product.find({}, 'id name image detailedCategory generalCategory sizeStatus stock').lean();
+
+        const alerts = [];
+        for (const p of products) {
+            // Kiểm tra sizeStatus (quần áo/giày)
+            if (p.sizeStatus && p.sizeStatus instanceof Map) {
+                const ss = p.sizeStatus.toObject();
+                for (const [size, info] of Object.entries(ss)) {
+                    if (info.status === 'low_stock' || info.status === 'out_of_stock') {
+                        alerts.push({
+                            productId: p.id,
+                            productName: p.name,
+                            image: p.image,
+                            category: p.detailedCategory,
+                            generalCategory: p.generalCategory,
+                            size,
+                            status: info.status,
+                            remainingQuantity: info.remainingQuantity ?? 0,
+                            type: 'size'
+                        });
+                    }
+                }
+            }
+
+            // Kiểm tra stock tổng (dụng cụ thể thao)
+            if (p.generalCategory === 'Sports Equipment' && typeof p.stock === 'number') {
+                if (p.stock <= LOW_STOCK_THRESHOLD) {
+                    alerts.push({
+                        productId: p.id,
+                        productName: p.name,
+                        image: p.image,
+                        category: p.detailedCategory,
+                        generalCategory: p.generalCategory,
+                        size: 'Total',
+                        status: p.stock === 0 ? 'out_of_stock' : 'low_stock',
+                        remainingQuantity: p.stock,
+                        type: 'total'
+                    });
+                }
+            }
+        }
+
+        // Sắp xếp: out_of_stock trước, rồi low_stock, theo số lượng tăng dần
+        alerts.sort((a, b) => {
+            if (a.status === 'out_of_stock' && b.status !== 'out_of_stock') return -1;
+            if (a.status !== 'out_of_stock' && b.status === 'out_of_stock') return 1;
+            return a.remainingQuantity - b.remainingQuantity;
+        });
+
+        res.json({ alerts, total: alerts.length, threshold: LOW_STOCK_THRESHOLD });
+    } catch (error) {
+        console.error('Lỗi khi lấy low-stock alerts:', error);
+        res.status(500).json({ error: 'Lỗi khi lấy danh sách tồn kho thấp.' });
+    }
+});
+
+// Lấy tất cả reviews (admin) - kèm thông tin sản phẩm
+app.get('/api/admin/reviews', fetchUser, async (req, res) => {
+    try {
+        if (req.user.role === 'user') {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+
+        const { visible } = req.query; // ?visible=true hoặc ?visible=false để lọc
+
+        const filter = {};
+        if (visible === 'true') filter.isVisible = true;
+        else if (visible === 'false') filter.isVisible = false;
+
+        const reviews = await Feedback.find(filter)
+            .sort({ date: -1 })
+            .lean();
+
+        // Lookup product name cho từng review
+        const productIds = [...new Set(reviews.map(r => r.productId))];
+        const products = await Product.find({ id: { $in: productIds } }, 'id name image').lean();
+        const productMap = Object.fromEntries(products.map(p => [p.id, p]));
+
+        const enriched = reviews.map(r => ({
+            ...r,
+            productName: productMap[r.productId]?.name || 'N/A',
+            productImage: productMap[r.productId]?.image || ''
+        }));
+
+        res.json(enriched);
+    } catch (error) {
+        console.error('Lỗi khi lấy reviews (admin):', error);
+        res.status(500).json({ error: 'Lỗi khi lấy danh sách đánh giá.' });
+    }
+});
+
+// Toggle visible/ẩn một review
+app.put('/api/admin/reviews/:id/toggle-visibility', fetchUser, async (req, res) => {
+    try {
+        if (req.user.role === 'user') {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+
+        const review = await Feedback.findById(req.params.id);
+        if (!review) return res.status(404).json({ error: 'Review không tồn tại.' });
+
+        review.isVisible = !review.isVisible;
+        await review.save();
+
+        res.json({ success: true, isVisible: review.isVisible, reviewId: review._id });
+    } catch (error) {
+        console.error('Lỗi khi toggle visibility review:', error);
+        res.status(500).json({ error: 'Lỗi khi cập nhật trạng thái đánh giá.' });
+    }
+});
+
+// Xóa một review (admin)
+app.delete('/api/admin/reviews/:id', fetchUser, async (req, res) => {
+    try {
+        if (req.user.role === 'user') {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+
+        const deleted = await Feedback.findByIdAndDelete(req.params.id);
+        if (!deleted) return res.status(404).json({ error: 'Review không tồn tại.' });
+
+        res.json({ success: true, deletedId: req.params.id });
+    } catch (error) {
+        console.error('Lỗi khi xóa review:', error);
+        res.status(500).json({ error: 'Lỗi khi xóa đánh giá.' });
+    }
+});
 
 // API endpoint để lấy danh sách nhân viên
 app.get('/api/staff-list', fetchUser, async (req, res) => {
@@ -1675,11 +1819,232 @@ app.post('/submit-contact-form', async (req, res) => {
     }
 });
 
+// ==========================================
+// AI CHATBOT - OLLAMA INTEGRATION
+// ==========================================
+
+const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434/api/chat';
+// Llama 3.2 chỉ có 1B/3B trên Ollama — không có tag llama3.2:7b. Dùng llama3.1:8b làm mặc định (mạnh, gần ý "cách B").
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.1:8b';
+const OLLAMA_TEMPERATURE = parseFloat(process.env.OLLAMA_TEMPERATURE) || 0.7;
+
+// System prompt cho chatbot - tối ưu cho model 7B
+const getSystemPrompt = (products, language = 'vi') => {
+    // Gom nhóm sản phẩm theo danh mục để AI dễ tìm kiếm
+    const byCategory = {};
+    products.forEach(p => {
+        const cat = p.detailedCategory || 'Khác';
+        if (!byCategory[cat]) byCategory[cat] = [];
+        byCategory[cat].push(p);
+    });
+
+    const formatPrice = (n) => n ? n.toLocaleString('vi-VN') + 'đ' : 'N/A';
+
+    let productLines = [];
+    Object.keys(byCategory).forEach(cat => {
+        productLines.push(`\n[${cat}]`);
+        byCategory[cat].forEach(p => {
+            const sizes = Array.isArray(p.size) && p.size.length ? p.size.join(', ') : 'N/A';
+            const desc = p.description ? ` - ${p.description.substring(0, 80)}` : '';
+            productLines.push(`  • ${p.name} | Giá: ${formatPrice(p.new_price)} (cũ: ${formatPrice(p.old_price)}) | Size: ${sizes}${desc}`);
+        });
+    });
+
+    const productContext = productLines.join('\n');
+
+    if (language === 'en') {
+        return `<instructions>
+You are an expert sales assistant at "Sportstores", a Vietnamese online sports retail store.
+- Products: Men's/Women's sportswear, soccer/basketball shoes, gym equipment, running shoes, sports accessories
+- Payment: Credit Card, Google Pay, Bank Transfer, COD (Cash on Delivery)
+- Shipping: Nationwide delivery
+- Return: 7-day return policy for unused items
+
+PRODUCT CATALOG:\n${productContext}
+
+IMPORTANT RULES:
+1. If a product exists in the catalog above → answer confidently using real data (name, price, size, description)
+2. If a product does NOT exist in the catalog → say: "Xin lỗi, sản phẩm đó hiện không có trong cửa hàng. Bạn có thể thử tìm sản phẩm khác hoặc liên hệ hotline để được hỗ trợ."
+3. NEVER make up or invent product information that isn't in the catalog
+4. Keep answers SHORT: 1-3 sentences for simple questions, 4-5 sentences for product recommendations
+5. For price questions → show formatted price with VND
+6. If user wants to buy → guide them to add to cart on the website
+7. Be enthusiastic and helpful
+8. Always respond in English when user writes in English</instructions>`;
+    } else {
+        return `<instructions>
+Bạn là chuyên viên tư vấn bán hàng của "Sportstores" - cửa hàng thể thao online tại Việt Nam.
+- Sản phẩm: Đồ thể thao Nam/Nữ, giày bóng đá/bóng rổ, dụng cụ gym, giày chạy bộ, phụ kiện thể thao
+- Thanh toán: Thẻ tín dụng, Google Pay, Chuyển khoản, COD (nhận hàng trả tiền)
+- Giao hàng: Toàn quốc
+- Đổi trả: 7 ngày với sản phẩm chưa sử dụng
+
+DANH MỤC SẢN PHẨM:\n${productContext}
+
+QUY TẮC QUAN TRỌNG:
+1. Nếu sản phẩm CÓ trong danh sách trên → trả lời tự tin, dùng đúng thông tin (tên, giá, size, mô tả)
+2. Nếu sản phẩm KHÔNG có trong danh sách → nói: "Xin lỗi, sản phẩm đó hiện không có trong cửa hàng. Bạn có thể thử tìm sản phẩm khác hoặc liên hệ hotline để được hỗ trợ." KHÔNG đề xuất thêm thông tin giả
+3. TUYỆT ĐỐI KHÔNG bịa đặt thông tin sản phẩm không có trong danh sách
+4. Trả lời NGẮN GỌN: 1-3 câu cho câu hỏi đơn giản, 4-5 câu cho tư vấn sản phẩm
+5. Hỏi giá → hiển thị giá đã format tiền VND
+6. Khách muốn mua → hướng dẫn thêm vào giỏ hàng trên website
+7. Nhiệt tình, thân thiện, tư vấn chính xác
+8. Luôn trả lời bằng tiếng Việt</instructions>`;
+    }
+};
+
+// Hàm xác định ngôn ngữ từ message
+const detectLanguage = (message) => {
+    if (!message) return 'vi';
+    const vietnamesePattern = /[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđĐ]/i;
+    return vietnamesePattern.test(message) ? 'vi' : 'en';
+};
+
+// Chatbot: trước đây chỉ .limit(50) không sort → nhiều sản phẩm (vd. "AAAA") không bao giờ vào context.
+const CHAT_PRODUCT_FIELDS = 'name new_price old_price detailedCategory generalCategory size description';
+const CHAT_MAX_PRODUCTS = parseInt(process.env.CHAT_MAX_PRODUCTS, 10) || 500;
+
+const CHAT_STOP_WORDS = new Set([
+    'thông', 'tin', 'về', 'sản', 'phẩm', 'cửa', 'hàng', 'bạn', 'cho', 'tôi', 'và', 'có', 'gì', 'là', 'một', 'của', 'này', 'đó', 'các', 'những', 'giá', 'bao', 'nhiêu',
+    'some', 'any', 'the', 'a', 'an', 'is', 'are', 'what', 'how', 'tell', 'me', 'about', 'product', 'products', 'info', 'information', 'please', 'want', 'need', 'show', 'list', 'all', 'shop', 'store'
+]);
+
+function escapeRegexChat(s) {
+    return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function extractChatKeywords(text) {
+    const matches = String(text).match(/[\p{L}\p{N}]{2,}/gu);
+    if (!matches) return [];
+    const out = new Set();
+    for (const m of matches) {
+        const low = m.toLowerCase();
+        if (!CHAT_STOP_WORDS.has(low)) out.add(low);
+    }
+    return [...out];
+}
+
+/** Luôn sort theo id; ưu tiên sản phẩm có tên khớp từ khóa trong câu hỏi. */
+async function loadProductsForChatbot(userMessage) {
+    const tokens = extractChatKeywords(userMessage);
+    let matched = [];
+    if (tokens.length > 0) {
+        const orConds = tokens.map(t => ({ name: new RegExp(escapeRegexChat(t), 'i') }));
+        matched = await Product.find({ $or: orConds }, CHAT_PRODUCT_FIELDS).sort({ id: 1 }).lean();
+    }
+    const matchedIds = matched.map(p => p.id);
+    const remainingLimit = Math.max(0, CHAT_MAX_PRODUCTS - matched.length);
+    let rest = [];
+    if (remainingLimit > 0) {
+        const query = matchedIds.length ? { id: { $nin: matchedIds } } : {};
+        rest = await Product.find(query, CHAT_PRODUCT_FIELDS).sort({ id: 1 }).limit(remainingLimit).lean();
+    }
+    const products = [...matched, ...rest];
+    console.log(`[ChatBot] Context: ${products.length} products (name-matched: ${matched.length}; keywords: ${tokens.join(', ') || 'none'})`);
+    return products;
+}
+
+// Kiểm tra nhanh: mở GET http://localhost:4000/api/chat/health trong trình duyệt
+app.get('/api/chat/health', (req, res) => {
+    res.json({
+        ok: true,
+        chatPostPath: '/api/chat',
+        ollamaUrl: OLLAMA_URL,
+        model: OLLAMA_MODEL
+    });
+});
+
+// API Chat endpoint
+app.post('/api/chat', async (req, res) => {
+    try {
+        const { message, history = [] } = req.body;
+
+        if (!message || message.trim() === '') {
+            return res.status(400).json({ error: 'Message is required' });
+        }
+
+        const products = await loadProductsForChatbot(message);
+
+        // Xác định ngôn ngữ và tạo system prompt tương ứng
+        const language = detectLanguage(message);
+        const systemPrompt = getSystemPrompt(products, language);
+
+        // Build messages array cho Ollama (đúng thứ tự: system -> history -> user)
+        const messages = [
+            { role: 'system', content: systemPrompt },
+            ...history.map(h => ({ role: h.role, content: h.content })),
+            { role: 'user', content: message }
+        ];
+
+        // Log prompt size để debug
+        console.log(`[ChatBot] Using model: ${OLLAMA_MODEL} | Prompt chars: ${systemPrompt.length} | History: ${history.length} msgs`);
+
+        // Gọi Ollama API với timeout 60 giây
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 60000);
+
+        const response = await fetch(OLLAMA_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: OLLAMA_MODEL,
+                messages: messages,
+                stream: false,
+                options: {
+                    temperature: OLLAMA_TEMPERATURE,
+                    top_p: 0.9,
+                    num_predict: 512
+                }
+            }),
+            signal: controller.signal
+        });
+        clearTimeout(timeout);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Ollama API Error:', errorText);
+            return res.status(500).json({
+                error: 'AI service unavailable. Please check Ollama is running with the correct model.',
+                details: errorText
+            });
+        }
+
+        const data = await response.json();
+        const reply = data.message?.content?.trim() || 'Xin lỗi, tôi không thể trả lời lúc này.';
+        res.json({ response: reply, language });
+
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            console.error('Chat API Error: Request timeout (model may be loading or too slow)');
+            return res.status(504).json({
+                error: 'AI response took too long. Please try again (model may still be loading).',
+                details: 'Timeout after 60 seconds'
+            });
+        }
+        console.error('Chat API Error:', error);
+        res.status(500).json({
+            error: 'Chat service error. Please try again.',
+            details: error.message
+        });
+    }
+});
+
+// API lấy thông tin sản phẩm cho chatbot context (debug / đồng bộ với shop)
+app.get('/api/chat/products', async (req, res) => {
+    try {
+        const products = await Product.find({}, CHAT_PRODUCT_FIELDS).sort({ id: 1 }).limit(CHAT_MAX_PRODUCTS).lean();
+        res.json(products);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch products' });
+    }
+});
+
 
     // Thay đổi app.listen thành server.listen
     server.listen(port, (error) => {
         if (!error) {
             console.log("Server Running on Port: " + port);
+            console.log("Chatbot: POST http://localhost:" + port + "/api/chat | Health: GET .../api/chat/health");
         } else {
             console.log("Error : " + error);
         }

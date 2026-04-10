@@ -3,6 +3,7 @@ import Navbar from './Components/Navbar/Navbar';
 import AboutUs from './Components/AboutUs/AboutUs';
 import Contact from './Components/Contact/Contact';
 import SizeGuide from './Components/SizeGuide/SizeGuide';
+import ChatBot from './Components/ChatBot/ChatBot';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useEffect, useContext } from 'react';
 import Shop from './Pages/Shop';
@@ -179,6 +180,8 @@ function App() {
                 <AppContent />
 
                 {showNavbarFooter && <Footer />}
+
+                <ChatBot />
         </div>
     );
 }

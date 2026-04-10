@@ -8,6 +8,8 @@ import ListProduct from '../Components/ListProduct/ListProduct';
 import ManageAccountsPage from '../Components/ManageAccountsPage/ManageAccountsPage';
 import StatisticPage from '../Components/StatisticPage/StatisticPage';
 import ManageCategories from '../Components/ManageCategories/ManageCategories';
+import LowStockAlerts from '../Components/LowStockAlerts/LowStockAlerts';
+import ReviewModeration from '../Components/ReviewModeration/ReviewModeration';
 
 const Admin = () => {
     return (
@@ -21,6 +23,8 @@ const Admin = () => {
                     <Route path='/manage-accounts' element={<ManageAccountsPage />} />
                     <Route path='/statistics' element={<StatisticPage />} />
                     <Route path='/manage-categories' element={<ManageCategories />} />
+                    <Route path='/low-stock-alerts' element={<LowStockAlerts />} />
+                    <Route path='/review-moderation' element={<ReviewModeration />} />
                 </Routes>
             </div>
         </div>
