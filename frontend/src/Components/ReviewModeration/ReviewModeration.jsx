@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import '../ReviewModeration/ReviewModeration.css';
+import API_BASE_URL from '../../config';
 
 const ReviewModeration = () => {
     const [reviews, setReviews] = useState([]);
@@ -18,7 +19,7 @@ const ReviewModeration = () => {
         try {
             const token = localStorage.getItem('auth-token');
             const query = filter !== 'all' ? `?visible=${filter === 'visible'}` : '';
-            const res = await fetch(`http://localhost:4000/api/admin/reviews${query}`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/reviews${query}`, {
                 headers: { 'auth-token': token }
             });
             const data = await res.json();
@@ -40,7 +41,7 @@ const ReviewModeration = () => {
         setActionLoading(reviewId);
         try {
             const token = localStorage.getItem('auth-token');
-            const res = await fetch(`http://localhost:4000/api/admin/reviews/${reviewId}/toggle-visibility`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/reviews/${reviewId}/toggle-visibility`, {
                 method: 'PUT',
                 headers: { 'auth-token': token }
             });
@@ -61,7 +62,7 @@ const ReviewModeration = () => {
         setActionLoading(reviewId);
         try {
             const token = localStorage.getItem('auth-token');
-            const res = await fetch(`http://localhost:4000/api/admin/reviews/${reviewId}`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/reviews/${reviewId}`, {
                 method: 'DELETE',
                 headers: { 'auth-token': token }
             });
@@ -243,7 +244,7 @@ const ReviewModeration = () => {
                                             <div className="review-product-cell">
                                                 {review.productImage && (
                                                     <img
-                                                        src={`http://localhost:4000/${review.productImage}`}
+                                                        src={`${API_BASE_URL}/${review.productImage}`}
                                                         alt={review.productName}
                                                         className="review-product-thumb"
                                                         onError={e => { e.target.style.display = 'none'; }}

@@ -4,6 +4,7 @@ import {
   PieChart, Pie, Cell, ResponsiveContainer
 } from 'recharts';
 import './StatisticPage.css';
+import API_BASE_URL from '../../config';
 
 const StatisticPage = () => {
   const [orders, setOrders] = useState([]);
@@ -13,10 +14,10 @@ const StatisticPage = () => {
     const fetchData = async () => {
       try {
         const [ordersRes, productsRes] = await Promise.all([
-          fetch('http://localhost:4000/admin/get-orders', {
+          fetch(`${API_BASE_URL}/admin/get-orders`, {
             headers: { 'auth-token': localStorage.getItem('auth-token') }
           }),
-          fetch('http://localhost:4000/allproducts')
+          fetch(`${API_BASE_URL}/allproducts`)
         ]);
         if (ordersRes.ok) setOrders(await ordersRes.json());
         const pd = await productsRes.json();

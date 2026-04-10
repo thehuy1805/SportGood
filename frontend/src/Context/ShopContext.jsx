@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, useContext } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from './AuthContext';
 import io from 'socket.io-client';
+import API_BASE_URL from '../config';
 
 export const ShopContext = createContext(null);
 
@@ -14,13 +15,13 @@ export const ShopContextProvider = ({ children }) => {
     const navigate = useNavigate();
 
     // Kết nối Socket.IO
-    const socket = io('http://localhost:4000'); 
+    const socket = io(API_BASE_URL);
 
     // Fetch all products
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const productsResponse = await fetch('http://localhost:4000/allproducts');
+                const productsResponse = await fetch(`${API_BASE_URL}/allproducts`);
                 const productsData = await productsResponse.json();
                 setAll_product(productsData);
             } catch (error) {
@@ -35,7 +36,7 @@ export const ShopContextProvider = ({ children }) => {
     useEffect(() => {
         const refreshProducts = async () => {
             try {
-                const res = await fetch('http://localhost:4000/allproducts');
+                const res = await fetch(`${API_BASE_URL}/allproducts`);
                 const data = await res.json();
                 setAll_product(data);
             } catch (err) {
@@ -69,7 +70,7 @@ useEffect(() => {
                 const token = localStorage.getItem('auth-token');
                 if (token) {
                     // Lấy giỏ hàng từ server
-                    const cartResponse = await fetch('http://localhost:4000/getcart', {
+                    const cartResponse = await fetch(`${API_BASE_URL}/getcart`, {
                         method: 'GET',
                         headers: {
                             'auth-token': token,
@@ -83,22 +84,22 @@ useEffect(() => {
 
                     // Merge giỏ hàng
                     const mergedCart = { ...serverCart };
-                    
+
                     // Thêm các sản phẩm từ local cart vào merged cart
                     for (const productId in localCart) {
                         if (!mergedCart[productId]) {
                             mergedCart[productId] = localCart[productId];
                         } else {
                             for (const size in localCart[productId]) {
-                                mergedCart[productId][size] = 
-                                    (mergedCart[productId][size] || 0) + 
+                                mergedCart[productId][size] =
+                                    (mergedCart[productId][size] || 0) +
                                     localCart[productId][size];
                             }
                         }
                     }
 
                     // Cập nhật giỏ hàng trên server
-                    await fetch('http://localhost:4000/updatecart', {
+                    await fetch(`${API_BASE_URL}/updatecart`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
@@ -149,7 +150,7 @@ useEffect(() => {
 
     const handleCategoriesUpdated = async () => {
         try {
-            const productsResponse = await fetch('http://localhost:4000/allproducts');
+            const productsResponse = await fetch(`${API_BASE_URL}/allproducts`);
             const productsData = await productsResponse.json();
             setAll_product(productsData);
         } catch (error) {
@@ -164,13 +165,13 @@ useEffect(() => {
         socket.off('stockUpdated', handleStockUpdate);
         socket.off('categoriesUpdated', handleCategoriesUpdated);
     };
-}, []); 
+}, []);
 
     // Cập nhật số lượng sản phẩm trong giỏ hàng
     const updateCartItemQuantity = async (itemId, size, quantity) => {
         setCart(prevCart => {
             const updatedCart = { ...prevCart };
-    
+
             if (quantity <= 0) {
                 // Xóa sản phẩm khi số lượng bằng 0
                 if (updatedCart[itemId]) {
@@ -187,7 +188,7 @@ useEffect(() => {
                 }
                 updatedCart[itemId][size] = quantity;
             }
-    
+
             // Cập nhật lại localStorage ngay sau khi thay đổi giỏ hàng
             localStorage.setItem('cart', JSON.stringify(updatedCart));
             return updatedCart;
@@ -217,7 +218,7 @@ useEffect(() => {
             try {
                 // Lấy toàn bộ giỏ hàng hiện tại
                 const token = localStorage.getItem('auth-token');
-                const cartResponse = await fetch('http://localhost:4000/getcart', {
+                const cartResponse = await fetch(`${API_BASE_URL}/getcart`, {
                     method: 'GET',
                     headers: {
                         'auth-token': token,
@@ -225,19 +226,19 @@ useEffect(() => {
                     }
                 });
                 const serverCart = await cartResponse.json();
-    
+
                 // Tạo bản sao của giỏ hàng từ server
                 const updatedServerCart = { ...serverCart };
-    
+
                 // Cập nhật số lượng sản phẩm
                 if (!updatedServerCart[itemId]) {
                     updatedServerCart[itemId] = {};
                 }
-                updatedServerCart[itemId][effectiveSize] = 
+                updatedServerCart[itemId][effectiveSize] =
                     (updatedServerCart[itemId][effectiveSize] || 0) + 1;
-    
+
                 // Gửi giỏ hàng đã cập nhật lên server
-                await fetch('http://localhost:4000/updatecart', {
+                await fetch(`${API_BASE_URL}/updatecart`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -248,9 +249,9 @@ useEffect(() => {
             } catch (error) {
                 console.error('Error adding to cart:', error);
             }
-        } 
+        }
     };
-    
+
 
 const removeFromCart = (itemId, size) => {
     setCart(prevCart => {
@@ -285,7 +286,7 @@ const removeFromCart = (itemId, size) => {
     if (isLoggedIn) {
         try {
             const token = localStorage.getItem('auth-token');
-            fetch('http://localhost:4000/updatecart', {
+            fetch(`${API_BASE_URL}/updatecart`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -303,15 +304,15 @@ const removeFromCart = (itemId, size) => {
     // Xóa tất cả sản phẩm khỏi giỏ hàng
     const clearCart = async () => {
         setCart({});
-        setSelectedSizes({}); 
-    
+        setSelectedSizes({});
+
         // Cập nhật lại localStorage ngay lập tức khi giỏ hàng bị xóa
         localStorage.setItem('cart', JSON.stringify({}));
-    
+
         // Đồng bộ giỏ hàng với server nếu người dùng đã đăng nhập
         if (isLoggedIn) {
             try {
-                await fetch('http://localhost:4000/clearcart', {
+                await fetch(`${API_BASE_URL}/clearcart`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

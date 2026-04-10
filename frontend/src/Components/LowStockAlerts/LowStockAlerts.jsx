@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../LowStockAlerts/LowStockAlerts.css';
+import API_BASE_URL from '../../config';
 
 const LowStockAlerts = () => {
     const [alerts, setAlerts] = useState([]);
@@ -15,7 +16,7 @@ const LowStockAlerts = () => {
         setError('');
         try {
             const token = localStorage.getItem('auth-token');
-            const res = await fetch('http://localhost:4000/api/admin/low-stock-alerts', {
+            const res = await fetch(`${API_BASE_URL}/api/admin/low-stock-alerts`, {
                 headers: { 'auth-token': token }
             });
             const data = await res.json();
@@ -191,7 +192,7 @@ const LowStockAlerts = () => {
                             >
                                 <div className="alerts-card-left">
                                     <img
-                                        src={`http://localhost:4000/${product.image}`}
+                                        src={`${API_BASE_URL}/${product.image}`}
                                         alt={product.productName}
                                         className="alerts-product-thumb"
                                         onError={e => { e.target.style.display = 'none'; }}

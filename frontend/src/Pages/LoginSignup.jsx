@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../Context/AuthContext';
 import './CSS/LoginSignup.css';
+import API_BASE_URL from '../config';
 
 export const LoginSignup = () => {
     const navigate = useNavigate();
@@ -48,7 +49,7 @@ export const LoginSignup = () => {
         clearMessages();
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:4000/login', {
+            const res = await fetch(`${API_BASE_URL}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
@@ -85,7 +86,7 @@ export const LoginSignup = () => {
         clearMessages();
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:4000/signup', {
+            const res = await fetch(`${API_BASE_URL}/signup`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
@@ -116,7 +117,7 @@ export const LoginSignup = () => {
         clearMessages();
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:4000/forgot-password', {
+            const res = await fetch(`${API_BASE_URL}/forgot-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: formData.email }),
@@ -143,7 +144,7 @@ export const LoginSignup = () => {
         clearMessages();
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:4000/verify-otp', {
+            const res = await fetch(`${API_BASE_URL}/verify-otp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: formData.email, otp: otpInput }),
@@ -174,7 +175,7 @@ export const LoginSignup = () => {
         clearMessages();
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:4000/update-password', {
+            const res = await fetch(`${API_BASE_URL}/update-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: formData.email, password: newPassword }),

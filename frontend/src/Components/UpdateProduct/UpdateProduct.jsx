@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './UpdateProduct.css';
+import API_BASE_URL from '../../config';
 
 const STATUS_OPTIONS = [
   { value: 'available', label: 'Available' },
@@ -24,7 +25,7 @@ const UpdateProduct = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await fetch('http://localhost:4000/allproducts');
+        const response = await fetch(`${API_BASE_URL}/allproducts`);
         const data = await response.json();
         const product = data.find((item) => item.id === parseInt(id));
         if (product) {
@@ -108,12 +109,12 @@ const UpdateProduct = () => {
       if (key !== 'image' && key !== 'additionalImages') formData.append(key, productDetails[key]);
     });
     try {
-      const response = await fetch(`http://localhost:4000/updateproduct/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/updateproduct/${id}`, {
         method: 'PUT', body: formData,
       });
       const data = await response.json();
       if (data.success) {
-        await fetch(`http://localhost:4000/updatestock/${id}`, {
+        await fetch(`${API_BASE_URL}/updatestock/${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sizeStatus: buildSizeStatus() }),

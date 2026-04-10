@@ -2,6 +2,7 @@ import React from 'react'
 import './Popular.css'
 import Item from '../Item/Item'
 import { useState, useEffect } from 'react'
+import API_BASE_URL from '../../config'
 
 const Popular = () => {
 
@@ -11,11 +12,11 @@ const Popular = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:4000/popularinwomen');
+        const response = await fetch(`${API_BASE_URL}/popularinwomen`);
         const data = await response.json();
 
         const feedbacksPromises = data.map(async (item) => {
-          const feedbackResponse = await fetch(`http://localhost:4000/get-feedbacks/${item.id}`);
+          const feedbackResponse = await fetch(`${API_BASE_URL}/get-feedbacks/${item.id}`);
           const feedbackData = await feedbackResponse.json();
           return { productId: item.id, feedbacks: feedbackData };
         });

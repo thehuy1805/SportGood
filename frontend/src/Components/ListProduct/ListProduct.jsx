@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './ListProduct.css';
+import API_BASE_URL from '../../config';
 
 const ListProduct = () => {
   const [products, setProducts] = useState([]);
@@ -12,7 +13,7 @@ const ListProduct = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('http://localhost:4000/allproducts');
+        const response = await fetch(`${API_BASE_URL}/allproducts`);
         const data = await response.json();
         setProducts(data);
         setFilteredProducts(data);
@@ -26,7 +27,7 @@ const ListProduct = () => {
   const handleDelete = async (productId) => {
     if (!window.confirm('Delete this product? This action cannot be undone.')) return;
     try {
-      const response = await fetch('http://localhost:4000/removeproduct', {
+      const response = await fetch(`${API_BASE_URL}/removeproduct`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: productId }),

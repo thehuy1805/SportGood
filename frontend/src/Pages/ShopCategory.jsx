@@ -4,6 +4,7 @@ import { ShopContext } from '../Context/ShopContext'
 import { useParams } from 'react-router-dom';
 import dropdown_icon from '../Components/Assets/dropdown_icon.png'
 import Item from '../Components/Item/Item'
+import API_BASE_URL from '../config';
 
 export const ShopCategory = (props) => {
   const {all_product} = useContext(ShopContext);
@@ -14,7 +15,7 @@ export const ShopCategory = (props) => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch(`http://localhost:4000/products/${categoryParam || props.category}`);
+        const response = await fetch(`${API_BASE_URL}/products/${categoryParam || props.category}`);
         const data = await response.json();
         setProducts(data);
       } catch (error) {

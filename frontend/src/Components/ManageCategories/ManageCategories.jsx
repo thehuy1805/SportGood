@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './ManageCategories.css';
+import API_BASE_URL from '../../config';
 
 const ManageCategories = () => {
     const [generalCategory, setGeneralCategory] = useState('');
@@ -35,7 +36,7 @@ const ManageCategories = () => {
 
     const fetchDetailedCategories = async () => {
         try {
-            const response = await fetch('http://localhost:4000/getDetailedCategories');
+            const response = await fetch(`${API_BASE_URL}/getDetailedCategories`);
             const data = await response.json();
             if (data.success) setCategories(data.categories);
         } catch (error) {
@@ -62,7 +63,7 @@ const ManageCategories = () => {
             else if (type === 'Shoes') finalSizes = ['38', '39', '40', '41', '42', '43'];
         }
         try {
-            const response = await axios.post('http://localhost:4000/addDetailedCategory', {
+            const response = await axios.post(`${API_BASE_URL}/addDetailedCategory`, {
                 name: detailedCategoryName,
                 generalCategory,
                 type,
@@ -86,12 +87,12 @@ const ManageCategories = () => {
     const handleDeleteCategory = async (id) => {
         if (!window.confirm('Delete this category? This cannot be undone.')) return;
         try {
-            const check = await axios.get(`http://localhost:4000/checkProductsInCategory/${id}`);
+            const check = await axios.get(`${API_BASE_URL}/checkProductsInCategory/${id}`);
             if (check.data.hasProducts) {
                 alert(`Cannot delete. ${check.data.productCount} products exist in this category.`);
                 return;
             }
-            const response = await axios.delete(`http://localhost:4000/deleteDetailedCategory/${id}`);
+            const response = await axios.delete(`${API_BASE_URL}/deleteDetailedCategory/${id}`);
             if (response.data.success) {
                 alert('Category deleted!');
                 fetchDetailedCategories();

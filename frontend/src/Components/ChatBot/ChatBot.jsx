@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import './ChatBot.css';
 import { MessageCircle, X, Send, Bot, User, Sparkles, Minimize2, Maximize2 } from 'lucide-react';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:4000';
+import API_BASE_URL from '../../config';
 
 const ChatBot = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -54,7 +54,7 @@ const ChatBot = () => {
                 content: m.content
             }));
 
-            const response = await fetch(`${API_BASE.replace(/\/$/, '')}/api/chat`, {
+            const response = await fetch(`${API_BASE_URL}/api/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

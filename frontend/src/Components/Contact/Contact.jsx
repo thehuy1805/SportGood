@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './Contact.css';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock } from 'react-icons/fa';
 import axios from 'axios';
+import API_BASE_URL from '../../config';
 
 const Contact = () => {
     const [formData, setFormData] = useState({
@@ -26,7 +27,7 @@ const Contact = () => {
     
         try {
             // Gửi dữ liệu form đến server
-            const response = await fetch('http://localhost:4000/submit-contact-form', {
+            const response = await fetch(`${API_BASE_URL}/submit-contact-form`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

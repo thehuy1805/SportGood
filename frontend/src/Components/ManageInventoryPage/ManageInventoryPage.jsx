@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import './ManageInventoryPage.css';
 import { ShopContext } from '../../Context/ShopContext';
+import API_BASE_URL from '../../config';
 
 const SHOE_CATEGORIES = ['Soccer Shoes', 'Basketball Shoes'];
 
@@ -27,7 +28,7 @@ const ManageInventoryPage = () => {
   // ── fetchProducts phải khai báo TRƯỚC useEffect gọi nó ──
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/allproducts');
+      const response = await axios.get(`${API_BASE_URL}/allproducts`);
       setProducts(response.data);
     } catch (error) {
       console.error('Error:', error);
@@ -60,7 +61,7 @@ const ManageInventoryPage = () => {
       return;
     }
     try {
-      await axios.put(`http://localhost:4000/updatestock/${id}`, {
+      await axios.put(`${API_BASE_URL}/updatestock/${id}`, {
         stock: newStock,
         sizeStatus: newSizeStatus,
       });

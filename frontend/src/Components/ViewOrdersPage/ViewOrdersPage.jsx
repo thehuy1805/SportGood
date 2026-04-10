@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { ShopContext } from '../../Context/ShopContext';
 import './ViewOrdersPage.css';
+import API_BASE_URL from '../../config';
 
 const ViewOrdersPage = () => {
   const { all_product } = useContext(ShopContext);
@@ -13,7 +14,7 @@ const ViewOrdersPage = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await fetch('http://localhost:4000/admin/get-orders', {
+        const response = await fetch(`${API_BASE_URL}/admin/get-orders`, {
           headers: { 'auth-token': localStorage.getItem('auth-token') }
         });
         if (response.ok) {

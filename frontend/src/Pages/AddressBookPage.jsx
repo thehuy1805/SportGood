@@ -28,7 +28,7 @@ const AddressBookPage = () => {
 
     const fetchProfile = async () => {
         try {
-            const res = await fetch('http://localhost:4000/get-profile', {
+                const res = await fetch(`${API_BASE_URL}/get-profile`, {
                 headers: { 'auth-token': localStorage.getItem('auth-token') }
             });
             const data = await res.json();
@@ -96,8 +96,8 @@ const AddressBookPage = () => {
         setMessage(null);
         try {
             const url = editingId
-                ? `http://localhost:4000/update-address/${editingId}`
-                : 'http://localhost:4000/add-address';
+                ? `${API_BASE_URL}/update-address/${editingId}`
+                : `${API_BASE_URL}/add-address`;
             const res = await fetch(url, {
                 method: editingId ? 'PUT' : 'POST',
                 headers: {
@@ -125,7 +125,7 @@ const AddressBookPage = () => {
         if (!window.confirm('Are you sure you want to delete this address?')) return;
         setDeletingId(addressId);
         try {
-            const res = await fetch(`http://localhost:4000/delete-address/${addressId}`, {
+            const res = await fetch(`${API_BASE_URL}/delete-address/${addressId}`, {
                 method: 'DELETE',
                 headers: { 'auth-token': localStorage.getItem('auth-token') }
             });
@@ -145,7 +145,7 @@ const AddressBookPage = () => {
 
     const handleSetDefault = async (addressId) => {
         try {
-            const res = await fetch(`http://localhost:4000/set-default-address/${addressId}`, {
+            const res = await fetch(`${API_BASE_URL}/set-default-address/${addressId}`, {
                 method: 'PUT',
                 headers: { 'auth-token': localStorage.getItem('auth-token') }
             });

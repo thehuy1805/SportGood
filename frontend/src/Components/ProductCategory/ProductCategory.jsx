@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './ProductCategory.css';
 import axios from 'axios';
 import io from 'socket.io-client';
+import API_BASE_URL from '../../config';
 
 const ProductCategory = ({ generalCategory, onDetailedCategorySelect }) => {
     const [categories, setCategories] = useState([]);
@@ -11,7 +12,7 @@ const ProductCategory = ({ generalCategory, onDetailedCategorySelect }) => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axios.get('http://localhost:4000/getDetailedCategories');
+                const response = await axios.get(`${API_BASE_URL}/getDetailedCategories`);
                 if (response.data.success) {
                     let detailedCategories = response.data.categories;
 
@@ -41,7 +42,7 @@ const ProductCategory = ({ generalCategory, onDetailedCategorySelect }) => {
 
         fetchCategories();
 
-        const socket = io('http://localhost:4000');
+        const socket = io(API_BASE_URL);
         socket.on('categoriesUpdated', () => {
             fetchCategories();
         });

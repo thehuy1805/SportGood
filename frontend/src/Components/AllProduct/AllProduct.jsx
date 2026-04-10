@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './AllProduct.css';
 import Item from '../../Components/Item/Item';
+import API_BASE_URL from '../../config';
 
 const AllProduct = ({ searchTerm, sortOrder, selectedCategory, generalCategory, detailedCategory }) => {
     const [products, setProducts] = useState([]);
@@ -9,12 +10,12 @@ const AllProduct = ({ searchTerm, sortOrder, selectedCategory, generalCategory, 
     useEffect(() => {
         const fetchProducts = async () => {
           try {
-            const response = await fetch('http://localhost:4000/allproducts');
+            const response = await fetch(`${API_BASE_URL}/allproducts`);
             const data = await response.json();
             setProducts(data);
     
             const feedbacksPromises = data.map(async (product) => {
-              const feedbackResponse = await fetch(`http://localhost:4000/get-feedbacks/${product.id}`);
+              const feedbackResponse = await fetch(`${API_BASE_URL}/get-feedbacks/${product.id}`);
               const feedbackData = await feedbackResponse.json();
               return { productId: product.id, feedbacks: feedbackData };
             });

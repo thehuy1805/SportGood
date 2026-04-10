@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { ShopContext } from '../Context/ShopContext';
 import './CSS/OrderHistoryPage.css';
+import API_BASE_URL from '../config';
 
 const OrderHistoryPage = () => {
     const { all_product } = useContext(ShopContext);
@@ -12,7 +13,7 @@ const OrderHistoryPage = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const response = await fetch('http://localhost:4000/get-orders', {
+                const response = await fetch(`${API_BASE_URL}/get-orders`, {
                     headers: {
                         'auth-token': localStorage.getItem('auth-token')
                     }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './ManageAccountsPage.css';
+import API_BASE_URL from '../../config';
 
 const ManageAccountsPage = () => {
     const [users, setUsers] = useState([]);
@@ -15,7 +16,7 @@ const ManageAccountsPage = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await fetch('http://localhost:4000/admin/get-users', {
+                const response = await fetch(`${API_BASE_URL}/admin/get-users`, {
                     headers: { 'auth-token': localStorage.getItem('auth-token') }
                 });
                 if (response.ok) {
@@ -44,7 +45,7 @@ const ManageAccountsPage = () => {
     const handleDelete = async (userId) => {
         if (!window.confirm('Delete this account? This action cannot be undone.')) return;
         try {
-            const response = await fetch(`http://localhost:4000/admin/delete-account/${userId}`, {
+            const response = await fetch(`${API_BASE_URL}/admin/delete-account/${userId}`, {
                 method: 'DELETE',
                 headers: { 'auth-token': localStorage.getItem('auth-token') }
             });
@@ -70,13 +71,13 @@ const ManageAccountsPage = () => {
         try {
             let response;
             if (editingUser._id) {
-                response = await fetch(`http://localhost:4000/admin/update-account/${editingUser._id}`, {
+                response = await fetch(`${API_BASE_URL}/admin/update-account/${editingUser._id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'auth-token': localStorage.getItem('auth-token') },
                     body: JSON.stringify(formData)
                 });
             } else {
-                response = await fetch('http://localhost:4000/admin/create-account', {
+                response = await fetch(`${API_BASE_URL}/admin/create-account`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'auth-token': localStorage.getItem('auth-token') },
                     body: JSON.stringify(formData)
@@ -85,7 +86,7 @@ const ManageAccountsPage = () => {
             const data = await response.json();
             if (response.ok) {
                 if (!editingUser._id) {
-                    const refreshed = await fetch('http://localhost:4000/admin/get-users', {
+                    const refreshed = await fetch(`${API_BASE_URL}/admin/get-users`, {
                         headers: { 'auth-token': localStorage.getItem('auth-token') }
                     }).then(r => r.json());
                     setUsers(refreshed);

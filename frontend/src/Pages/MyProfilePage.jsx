@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../Context/AuthContext';
 import './CSS/MyProfilePage.css';
+import API_BASE_URL from '../config';
 
 const MyProfilePage = () => {
     const { userId, login } = useContext(AuthContext);
@@ -23,7 +24,7 @@ const MyProfilePage = () => {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const res = await fetch('http://localhost:4000/get-profile', {
+                const res = await fetch(`${API_BASE_URL}/get-profile`, {
                     headers: { 'auth-token': localStorage.getItem('auth-token') }
                 });
                 const data = await res.json();
@@ -52,7 +53,7 @@ const MyProfilePage = () => {
         setSaving(true);
         setMessage(null);
         try {
-            const res = await fetch('http://localhost:4000/update-profile', {
+                const res = await fetch(`${API_BASE_URL}/update-profile`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -97,7 +98,7 @@ const MyProfilePage = () => {
         }
         setSaving(true);
         try {
-            const res = await fetch('http://localhost:4000/update-password', {
+            const res = await fetch(`${API_BASE_URL}/update-password`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

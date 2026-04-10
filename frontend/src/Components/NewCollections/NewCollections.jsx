@@ -3,6 +3,7 @@ import './NewCollections.css'
 import Item from '../Item/Item'
 import {useState} from 'react'
 import {useEffect} from 'react'
+import API_BASE_URL from '../../config'
 
 const NewCollections = () => {
 
@@ -12,12 +13,12 @@ const [productFeedbacks, setProductFeedbacks] = useState({});
 useEffect(() => {
   const fetchData = async () => {
     try {
-      const response = await fetch('http://localhost:4000/newcollections');
+      const response = await fetch(`${API_BASE_URL}/newcollections`);
       const data = await response.json();
       setNew_collection(data);
 
       const feedbacksPromises = data.map(async (item) => {
-        const feedbackResponse = await fetch(`http://localhost:4000/get-feedbacks/${item.id}`);
+        const feedbackResponse = await fetch(`${API_BASE_URL}/get-feedbacks/${item.id}`);
         const feedbackData = await feedbackResponse.json();
         return { productId: item.id, feedbacks: feedbackData };
       });

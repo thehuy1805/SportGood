@@ -6,6 +6,7 @@ import cardIcon from '../Components/Assets/img_card.png';
 import gpayIcon from '../Components/Assets/gpayIcon.svg';
 import bankIcon from '../Components/Assets/bankIcon.svg';
 import codIcon from '../Components/Assets/img_cod.png';
+import API_BASE_URL from '../config';
 
 const CheckoutPage = () => {
     const { cartItems, getTotalCartAmount, all_product, clearCart } = useContext(ShopContext);
@@ -53,7 +54,7 @@ const CheckoutPage = () => {
     useEffect(() => {
         const fetchAddresses = async () => {
             try {
-                const res = await fetch('http://localhost:4000/get-profile', {
+                const res = await fetch(`${API_BASE_URL}/get-profile`, {
                     headers: { 'auth-token': localStorage.getItem('auth-token') }
                 });
                 const data = await res.json();
@@ -120,7 +121,7 @@ const CheckoutPage = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:4000/checkout', {
+            const response = await fetch(`${API_BASE_URL}/checkout`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

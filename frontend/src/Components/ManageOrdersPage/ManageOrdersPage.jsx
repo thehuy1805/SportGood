@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './ManageOrdersPage.css';
+import API_BASE_URL from '../../config';
 
 export const ManageOrdersPage = () => {
     const [orders, setOrders] = useState([]);
@@ -8,7 +9,7 @@ export const ManageOrdersPage = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const response = await fetch('http://localhost:4000/staff/get-all-orders', {
+                const response = await fetch(`${API_BASE_URL}/staff/get-all-orders`, {
                     headers: { 'auth-token': localStorage.getItem('auth-token') }
                 });
                 if (response.ok) {
@@ -24,7 +25,7 @@ export const ManageOrdersPage = () => {
 
     const handleStatusChange = async (orderId, newStatus) => {
         try {
-            const response = await fetch(`http://localhost:4000/staff/update-order-status/${orderId}`, {
+            const response = await fetch(`${API_BASE_URL}/staff/update-order-status/${orderId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

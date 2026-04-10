@@ -2,6 +2,7 @@
   import './RelatedProducts.css';
   import Item from '../Item/Item';
   import useProductStore from '../../store/productStore';
+  import API_BASE_URL from '../../config';
 
   const RelatedProducts = () => {
     const [relatedProducts, setRelatedProducts] = useState([]);
@@ -11,7 +12,7 @@
       const fetchRelatedProducts = async () => {
         if (selectedProduct) {
           try {
-            const response = await fetch('http://localhost:4000/allproducts');
+            const response = await fetch(`${API_BASE_URL}/allproducts`);
             const data = await response.json();
 
             const filteredProducts = data.filter(item => 

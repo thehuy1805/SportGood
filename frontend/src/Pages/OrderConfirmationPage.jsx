@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { ShopContext } from '../Context/ShopContext';
 import './CSS/OrderConfirmationPage.css';
+import API_BASE_URL from '../config';
 
 const OrderConfirmationPage = () => {
   const { all_product } = useContext(ShopContext);
@@ -15,7 +16,7 @@ const OrderConfirmationPage = () => {
 
     const fetchOrderDetails = async () => {
       try {
-        const response = await fetch(`http://localhost:4000/get-order/${orderId}`, {
+        const response = await fetch(`${API_BASE_URL}/get-order/${orderId}`, {
           headers: {
             'auth-token': localStorage.getItem('auth-token')
           }

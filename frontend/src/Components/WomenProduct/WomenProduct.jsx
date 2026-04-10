@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Item from "../../Components/Item/Item";
 import '../../Components/AllProduct/AllProduct.css';
+import API_BASE_URL from '../../config';
 
 const WomenProduct = ({
   searchTerm,
@@ -14,7 +15,7 @@ const WomenProduct = ({
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch("http://localhost:4000/allproducts");
+        const response = await fetch(`${API_BASE_URL}/allproducts`);
         const data = await response.json();
 
         // Lọc sản phẩm có generalCategory là "Women"
@@ -26,7 +27,7 @@ const WomenProduct = ({
         // Fetch feedbacks cho tất cả sản phẩm Women
         const feedbacksPromises = womenProducts.map(async (product) => {
           const feedbackResponse = await fetch(
-            `http://localhost:4000/get-feedbacks/${product.id}`
+            `${API_BASE_URL}/get-feedbacks/${product.id}`
           );
           const feedbackData = await feedbackResponse.json();
           return { productId: product.id, feedbacks: feedbackData };

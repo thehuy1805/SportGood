@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './AddProduct.css';
 import { useNavigate } from 'react-router-dom';
+import API_BASE_URL from '../../config';
 
 export const AddProduct = () => {
     const navigate = useNavigate();
@@ -21,7 +22,7 @@ export const AddProduct = () => {
     useEffect(() => {
         const fetchCustomCategories = async () => {
             try {
-                const response = await axios.get('http://localhost:4000/getDetailedCategories');
+                const response = await axios.get(`${API_BASE_URL}/getDetailedCategories`);
                 if (response.data.success) {
                     setCustomCategories(response.data.categories);
                 }
@@ -85,7 +86,7 @@ export const AddProduct = () => {
             formData.append(key, productDetails[key]);
         });
         try {
-            const response = await axios.post('http://localhost:4000/addproduct', formData, {
+            const response = await axios.post(`${API_BASE_URL}/addproduct`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
             if (response.data.success) {

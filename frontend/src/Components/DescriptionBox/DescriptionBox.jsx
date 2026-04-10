@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import './DescriptionBox.css';
 import { AuthContext } from '../../Context/AuthContext';
+import API_BASE_URL from '../../config';
 
 const StarIcon = ({ filled }) => (
   <svg width="12" height="12" viewBox="0 0 24 24" fill={filled ? "#f05353" : "none"} stroke={filled ? "#f05353" : "#d0d0d0"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -30,7 +31,7 @@ const DescriptionBox = ({ productId, product, onFeedbacksChange }) => {
   useEffect(() => {
     const fetchFeedbacks = async () => {
       try {
-        const response = await fetch(`http://localhost:4000/get-feedbacks/${productId}`);
+        const response = await fetch(`${API_BASE_URL}/get-feedbacks/${productId}`);
         const data = await response.json();
         setFeedbacks(data);
         onFeedbacksChange(data);
@@ -80,7 +81,7 @@ const DescriptionBox = ({ productId, product, onFeedbacksChange }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:4000/add-feedback', {
+      const response = await fetch(`${API_BASE_URL}/add-feedback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
