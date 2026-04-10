@@ -25,14 +25,49 @@ cloudinary.config({
     const server = http.createServer(app);
         const io = socketIo(server, {
         cors: {
-            origin: process.env.CLIENT_ORIGIN || "http://localhost:3000",
-            methods: ["GET", "POST"]
+            origin: [
+                'http://localhost:3000',
+                'http://localhost:5173',
+                'https://sport-good-e43j.vercel.app',
+                'https://sportgood.onrender.com',
+            ],
+            methods: ["GET", "POST"],
+            credentials: true
         }
     });
 
 
         app.use(express.json());
-        app.use(cors());
+        const corsOptions = {
+    origin: function (origin, callback) {
+        // Danh sách các origin được phép
+        const allowedOrigins = [
+            'http://localhost:3000',
+            'http://localhost:5173',
+            'https://sport-good-e43j.vercel.app',
+            'https://sportgood.onrender.com',
+        ];
+
+        // Cho phép request không có origin (VD: Postman, mobile apps)
+        if (!origin) {
+            return callback(null, true);
+        }
+
+        // Kiểm tra origin có trong danh sách cho phép không
+        if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            // Log origin bị từ chối để debug
+            console.log('CORS blocked origin:', origin);
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'auth-token', 'Authorization', 'origin', 'Accept']
+};
+
+app.use(cors(corsOptions));
 
         // Kết nối MongoDB được gọi trong startServer() (cuối file) để Render có PORT + MONGODB_URI đúng.
 
