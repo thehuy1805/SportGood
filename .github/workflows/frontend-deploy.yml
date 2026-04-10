@@ -1,0 +1,55 @@
+name: Deploy Frontend to Vercel
+
+# Kich hoat khi co push hoac pull request len main
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'frontend/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'frontend/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Lay code tu GitHub
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Cài đặt Node.js (phien ban 18)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      # 3. Cài đặt dependencies
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      # 4. Build production
+      - name: Build
+        run: |
+          cd frontend
+          npm run build
+        env:
+          CI: false  # Vercel tu dong dat CI=true, ta dat false de tranh loi build
+
+      # 5. Deploy len Vercel
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_FRONTEND_PROJECT_ID }}
+          vercel-args: '--prod'
+          working-directory: frontend

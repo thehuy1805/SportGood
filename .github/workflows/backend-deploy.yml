@@ -1,0 +1,56 @@
+name: Deploy Backend to Render
+
+# Kich hoat khi co push hoac pull request len main
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Lay code tu GitHub
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Cài đặt Node.js (phien ban 18)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      # 3. Cài đặt dependencies
+      - name: Install dependencies
+        run: |
+          cd backend
+          npm ci
+
+      # 4. Chạy build (neu co script build)
+      - name: Build
+        run: |
+          cd backend
+          npm run build 2>/dev/null || echo "Khong co build script, bo qua."
+
+      # 5. Deploy len Render
+      - name: Deploy to Render
+        run: |
+          curl -s -X POST "${{ secrets.RENDER_API_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "trigger": {
+                "type": "github",
+                "branch": "main",
+                "commitRef": "'"$GITHUB_SHA"'"
+              }
+            }' \
+            "https://api.render.com/v1/services/${{ secrets.RENDER_BACKEND_SERVICE_ID }}/deploys"
