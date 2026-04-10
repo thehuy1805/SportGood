@@ -1,22 +1,31 @@
-        require('dotenv').config();
-        const port = 4000;
-        const express = require("express");
-        const app = express();
-        const mongoose = require("mongoose");
-        const jwt = require("jsonwebtoken");
-        const multer = require("multer");
-        const path = require("path");
-        const cors = require("cors");
-        const nodemailer = require('nodemailer');
-        const http = require('http');
-        const socketIo = require('socket.io');
-        const fetch = require('node-fetch');
-        const Message = require('./models/Message');
+require('dotenv').config();
+const port = Number(process.env.PORT) || 4000;
+const express = require("express");
+const app = express();
+const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
+const multer = require("multer");
+const path = require("path");
+const cors = require("cors");
+const nodemailer = require('nodemailer');
+const http = require('http');
+const socketIo = require('socket.io');
+const fetch = require('node-fetch');
+const Message = require('./models/Message');
+// Cloudinary configuration
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
     const server = http.createServer(app);
         const io = socketIo(server, {
         cors: {
-            origin: "http://localhost:3000",
+            origin: process.env.CLIENT_ORIGIN || "http://localhost:3000",
             methods: ["GET", "POST"]
         }
     });
@@ -25,30 +34,31 @@
         app.use(express.json());
         app.use(cors());
 
-        //database connection
-        mongoose.connect(process.env.MONGODB_URI);
+        // Kết nối MongoDB được gọi trong startServer() (cuối file) để Render có PORT + MONGODB_URI đúng.
 
         //API create
         app.get("/",(req, res) => {
             res.send("Express App is Running")
         })
 
-        //Image Storage Engine
-        const storage = multer.diskStorage({
-            destination: './upload/images',
-            filename:(req,file,cb)=>{
-                return cb(null,`${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`)
-            }
-        })
+        //Image Storage Engine - Sử dụng Cloudinary thay vì lưu trên local
+        const storage = new CloudinaryStorage({
+            cloudinary: cloudinary,
+            params: {
+                folder: 'sportstores',
+                allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+                transformation: [{ width: 800, height: 800, crop: 'limit' }],
+            },
+        });
 
-        const upload = multer({storage:storage})
+        const upload = multer({ storage: storage });
 
         //Creating Upload Endpoint for Images
         app.use('/images',express.static('upload/images'))
         app.post("/upload", upload.single('product'),(req,res) => {
             res.json({
                 success:1,
-                image_url:`http://localhost:${port}/images/${req.file.filename}`
+                image_url: req.file.path
             })
         })
 
@@ -124,8 +134,9 @@
                 let products = await Product.find({});
                 let id = products.length > 0 ? products[products.length - 1].id + 1 : 1;
         
-                const mainImage = req.files[0] ? `http://localhost:${port}/images/${req.files[0].filename}` : '';
-                const additionalImages = req.files.slice(1).map(file => `http://localhost:${port}/images/${file.filename}`);
+                // Sử dụng URL từ Cloudinary thay vì localhost
+                const mainImage = req.files[0] ? req.files[0].path : '';
+                const additionalImages = req.files.slice(1).map(file => file.path);
         
                 const generalCategory = req.body.generalCategory;
                 const detailedCategory = req.body.detailedCategory;
@@ -183,14 +194,14 @@
                 description: req.body.description,
             };
         
-            // Xử lý ảnh chính 
+            // Xử lý ảnh chính
             if (req.files['image'] && req.files['image'][0]) {
-                updatedData.image = `http://localhost:${port}/images/${req.files['image'][0].filename}`;
+                updatedData.image = req.files['image'][0].path;
             }
         
             // Xử lý ảnh phụ
             if (req.files['additionalImages']) {
-                updatedData.additionalImages = req.files['additionalImages'].map(file => `http://localhost:${port}/images/${file.filename}`);
+                updatedData.additionalImages = req.files['additionalImages'].map(file => file.path);
             }
         
             const updatedProduct = await Product.findOneAndUpdate({ id: productId }, updatedData, { new: true });
@@ -2040,12 +2051,22 @@ app.get('/api/chat/products', async (req, res) => {
 });
 
 
-    // Thay đổi app.listen thành server.listen
-    server.listen(port, (error) => {
-        if (!error) {
-            console.log("Server Running on Port: " + port);
-            console.log("Chatbot: POST http://localhost:" + port + "/api/chat | Health: GET .../api/chat/health");
-        } else {
-            console.log("Error : " + error);
+    async function startServer() {
+        const mongoUri = process.env.MONGODB_URI;
+        if (!mongoUri) {
+            console.error('Thiếu MONGODB_URI. Trên Render: Environment → Add → MONGODB_URI = chuỗi kết nối MongoDB Atlas.');
+            process.exit(1);
         }
-    });
+        try {
+            await mongoose.connect(mongoUri);
+            console.log('Đã kết nối MongoDB.');
+            server.listen(port, () => {
+                console.log('Server Running on Port: ' + port);
+                console.log('Chatbot: POST .../api/chat | Health: GET .../api/chat/health');
+            });
+        } catch (err) {
+            console.error('Lỗi kết nối MongoDB:', err.message);
+            process.exit(1);
+        }
+    }
+    startServer();
