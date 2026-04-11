@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
 const cors = require("cors");
 const nodemailer = require('nodemailer');
 const http = require('http');
@@ -15,6 +16,12 @@ const Message = require('./models/Message');
 // Cloudinary configuration
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+// Kiểm tra và log Cloudinary credentials
+console.log('Cloudinary config check:');
+console.log('- CLOUDINARY_CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME ? '✅ Set' : '❌ Missing');
+console.log('- CLOUDINARY_API_KEY:', process.env.CLOUDINARY_API_KEY ? '✅ Set' : '❌ Missing');
+console.log('- CLOUDINARY_API_SECRET:', process.env.CLOUDINARY_API_SECRET ? '✅ Set' : '❌ Missing');
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -100,16 +107,30 @@ app.use((req, res, next) => {
         })
 
         //Image Storage Engine - Sử dụng Cloudinary thay vì lưu trên local
-        const storage = new CloudinaryStorage({
-            cloudinary: cloudinary,
-            params: {
-                folder: 'sportstores',
-                allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-                transformation: [{ width: 800, height: 800, crop: 'limit' }],
-            },
-        });
+        let storage;
+        try {
+            storage = new CloudinaryStorage({
+                cloudinary: cloudinary,
+                params: {
+                    folder: 'sportstores',
+                    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+                    transformation: [{ width: 800, height: 800, crop: 'limit' }],
+                },
+            });
+            console.log('CloudinaryStorage initialized successfully');
+        } catch (storageError) {
+            console.error('CloudinaryStorage initialization error:', storageError);
+            storage = null;
+        }
 
-        const upload = multer({ storage: storage });
+        // Middleware upload - kiểm tra storage có tồn tại không
+        const upload = storage
+            ? multer({ storage: storage })
+            : multer({ dest: './upload/images' }); // Fallback to local storage
+
+        if (!storage) {
+            console.warn('WARNING: Cloudinary not configured. Using local storage fallback.');
+        }
 
         //Creating Upload Endpoint for Images
         app.use('/images',express.static('upload/images'))
@@ -192,6 +213,15 @@ app.use((req, res, next) => {
                 let products = await Product.find({});
                 let id = products.length > 0 ? products[products.length - 1].id + 1 : 1;
         
+                // Kiểm tra files có tồn tại không
+                if (!req.files || req.files.length === 0) {
+                    console.error('No files uploaded');
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Vui lòng tải lên ít nhất 1 hình ảnh'
+                    });
+                }
+        
                 // Sử dụng URL từ Cloudinary thay vì localhost
                 const mainImage = req.files[0] ? req.files[0].path : '';
                 const additionalImages = req.files.slice(1).map(file => file.path);
@@ -213,7 +243,7 @@ app.use((req, res, next) => {
                     name: req.body.name,
                     image: mainImage,
                     additionalImages: additionalImages,
-                    detailedCategory: req.body.detailedCategory,
+                    detailedCategory: detailedCategory,
                     generalCategory: generalCategory,
                     size: sizes,
                     sizeStatus: defaultSizeStatus,
@@ -232,7 +262,7 @@ app.use((req, res, next) => {
                 console.error('Error when adding products:', error);
                 res.status(500).json({
                     success: false,
-                    error: 'An error occurred while adding products. Please try again later.'
+                    error: error.message || 'An error occurred while adding products. Please try again later.'
                 });
             }
         });
