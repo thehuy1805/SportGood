@@ -113,7 +113,7 @@ app.use((req, res, next) => {
                 cloudinary: cloudinary,
                 params: {
                     folder: 'sportstores',
-                    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+                    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'svg'],
                     transformation: [{ width: 800, height: 800, crop: 'limit' }],
                 },
             });
