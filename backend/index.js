@@ -69,6 +69,15 @@ cloudinary.config({
 
 app.use(cors(corsOptions));
 
+// Xử lý preflight OPTIONS request cho tất cả routes (QUAN TRỌNG cho file upload)
+app.options('*', cors(corsOptions));
+
+// Middleware để log tất cả requests (debug)
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.path} - Origin: ${req.headers.origin}`);
+    next();
+});
+
         // Kết nối MongoDB được gọi trong startServer() (cuối file) để Render có PORT + MONGODB_URI đúng.
 
         //API create
