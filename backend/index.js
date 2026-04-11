@@ -67,14 +67,28 @@ cloudinary.config({
     allowedHeaders: ['Content-Type', 'auth-token', 'Authorization', 'origin', 'Accept']
 };
 
-app.use(cors(corsOptions));
-
-// Xử lý preflight OPTIONS request cho tất cả routes (QUAN TRỌNG cho file upload)
-app.options('*', cors(corsOptions));
-
-// Middleware để log tất cả requests (debug)
+// Middleware CORS - Xử lý tất cả requests từ frontend Vercel
 app.use((req, res, next) => {
-    console.log(`${req.method} ${req.path} - Origin: ${req.headers.origin}`);
+    const allowedOrigins = [
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'https://sport-good-e43j.vercel.app',
+        'https://sportgood.onrender.com',
+    ];
+    
+    const origin = req.headers.origin;
+    if (allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, auth-token, Authorization, origin, Accept');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    
+    // Xử lý preflight OPTIONS request ngay tại đây
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+    
     next();
 });
 
