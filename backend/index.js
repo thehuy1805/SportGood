@@ -210,6 +210,10 @@ app.use((req, res, next) => {
 
         app.post('/addproduct', upload.array('images', 5), async (req, res) => {
             try {
+                console.log('=== addproduct endpoint called ===');
+                console.log('Body:', req.body);
+                console.log('Files:', req.files);
+                
                 let products = await Product.find({});
                 let id = products.length > 0 ? products[products.length - 1].id + 1 : 1;
         
@@ -238,6 +242,10 @@ app.use((req, res, next) => {
                 const defaultSizeStatus = {};
                 sizes.forEach(s => { defaultSizeStatus[s] = { status: 'available', remainingQuantity: null }; });
 
+                console.log('Creating product with id:', id);
+                console.log('mainImage:', mainImage);
+                console.log('sizes:', sizes);
+
                 const product = new Product({
                     id: id,
                     name: req.body.name,
@@ -252,14 +260,21 @@ app.use((req, res, next) => {
                     description: req.body.description,
                 });
         
+                console.log('Saving product...');
                 await product.save();
+                console.log('Product saved successfully!');
+                
                 io.emit('categoriesUpdated'); 
                 res.json({
                     success: true,
                     name: req.body.name,
                 });
             } catch (error) {
-                console.error('Error when adding products:', error);
+                console.error('=== ERROR in addproduct ===');
+                console.error('Error name:', error.name);
+                console.error('Error message:', error.message);
+                console.error('Error stack:', error.stack);
+                console.error('Full error:', error);
                 res.status(500).json({
                     success: false,
                     error: error.message || 'An error occurred while adding products. Please try again later.'
@@ -2136,6 +2151,73 @@ app.get('/api/chat/products', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch products' });
     }
+});
+
+
+// ============ GLOBAL ERROR HANDLER ============
+// Xử lý tất cả lỗi không được handle ở trên
+app.use((err, req, res, next) => {
+    console.error('=== GLOBAL ERROR HANDLER ===');
+    console.error('Error name:', err.name);
+    console.error('Error message:', err.message);
+    console.error('Error stack:', err.stack);
+    console.error('Request path:', req.path);
+    console.error('Request method:', req.method);
+    
+    // Xử lý lỗi Multer (file upload)
+    if (err.name === 'MulterError') {
+        console.error('MulterError code:', err.code);
+        console.error('MulterError message:', err.message);
+        
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).json({
+                success: false,
+                error: 'File quá lớn. Vui lòng chọn file nhỏ hơn.'
+            });
+        }
+        if (err.code === 'LIMIT_FILE_COUNT') {
+            return res.status(400).json({
+                success: false,
+                error: 'Quá nhiều files. Chỉ được upload tối đa 5 files.'
+            });
+        }
+        if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+            return res.status(400).json({
+                success: false,
+                error: 'Field name không hợp lệ. Sử dụng "images" làm field name.'
+            });
+        }
+        
+        return res.status(400).json({
+            success: false,
+            error: 'Lỗi upload file: ' + err.message
+        });
+    }
+    
+    // Xử lý lỗi Cloudinary
+    if (err.message && err.message.includes('cloudinary')) {
+        console.error('Cloudinary error details:', err);
+        return res.status(500).json({
+            success: false,
+            error: 'Lỗi Cloudinary: ' + err.message
+        });
+    }
+    
+    // Xử lý các lỗi khác
+    res.status(err.status || 500).json({
+        success: false,
+        error: err.message || 'Internal Server Error',
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
+});
+
+// 404 handler - xử lý các route không tìm thấy
+app.use((req, res) => {
+    console.log('404 - Route not found:', req.method, req.path);
+    res.status(404).json({
+        success: false,
+        error: 'Route not found: ' + req.path
+    });
 });
 
 
