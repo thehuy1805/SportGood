@@ -1,19 +1,29 @@
-import React, { useContext, useRef, useState } from 'react';
+import React, { useContext, useRef, useState, useEffect } from 'react';
 import './Navbar.css';
 import logo from '../Assets/main_logo.jpg';
 import cart_icon from '../Assets/cart_icon.png';
 import user_icon from '../Assets/user_icon.png';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { ShopContext } from '../../Context/ShopContext';
 import { AuthContext } from '../../Context/AuthContext';
 import { User, Ruler, ShoppingBag, LogOut, Menu, X, Search, Heart, Home, LayoutGrid, Zap, UserCircle, MapPin } from 'lucide-react';
 
 const Navbar = () => {
-    const { getTotalCartItems } = useContext(ShopContext);
+    const { getTotalCartItems, getWishlistCount } = useContext(ShopContext);
     const { logout, userName, userId } = useContext(AuthContext);
     const userMenuRef = useRef();
     const [isLoading, setIsLoading] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [searchOpen, setSearchOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const searchInputRef = useRef(null);
+    const searchRef = useRef(null);
+    const navigate = useNavigate();
+
+    const generateSlug = (name) => {
+        return name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+    };
 
     const handleClick = () => {
         setIsLoading(true);
@@ -29,6 +39,87 @@ const Navbar = () => {
     const handleLogout = () => {
         logout();
         window.location.replace('/');
+    };
+
+    // Search overlay toggle
+    const toggleSearch = () => {
+        setSearchOpen(!searchOpen);
+        if (!searchOpen) {
+            setSearchQuery('');
+            setSearchResults([]);
+            setTimeout(() => {
+                if (searchInputRef.current) searchInputRef.current.focus();
+            }, 100);
+        }
+    };
+
+    // Close search when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (searchRef.current && !searchRef.current.contains(e.target)) {
+                setSearchOpen(false);
+                setSearchQuery('');
+                setSearchResults([]);
+            }
+        };
+        if (searchOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [searchOpen]);
+
+    // Handle escape key
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape' && searchOpen) {
+                setSearchOpen(false);
+                setSearchQuery('');
+                setSearchResults([]);
+            }
+        };
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [searchOpen]);
+
+    // Search logic
+    const { all_product } = useContext(ShopContext);
+
+    const handleSearchChange = (e) => {
+        const query = e.target.value;
+        setSearchQuery(query);
+
+        if (query.trim().length === 0) {
+            setSearchResults([]);
+            return;
+        }
+
+        const lowerQuery = query.toLowerCase();
+        const results = all_product
+            .filter(product =>
+                product.name.toLowerCase().includes(lowerQuery) ||
+                (product.detailedCategory && product.detailedCategory.toLowerCase().includes(lowerQuery)) ||
+                (product.generalCategory && product.generalCategory.toLowerCase().includes(lowerQuery))
+            )
+            .slice(0, 8);
+
+        setSearchResults(results);
+    };
+
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            setSearchOpen(false);
+            setSearchQuery('');
+            setSearchResults([]);
+            navigate(`/?search=${encodeURIComponent(searchQuery.trim())}`);
+        }
+    };
+
+    const handleResultClick = (product) => {
+        setSearchOpen(false);
+        setSearchQuery('');
+        setSearchResults([]);
+        navigate(`/product/${generateSlug(product.name)}`);
     };
 
     const navLinks = [
@@ -104,14 +195,16 @@ const Navbar = () => {
                     {/* Right: Actions */}
                     <div className="navbar-right">
                         {/* Search icon */}
-                        <button className="icon-btn search-btn" aria-label="Search">
+                        <button className="icon-btn search-btn" aria-label="Search" onClick={toggleSearch}>
                             <Search size={20} />
                         </button>
 
                         {/* Wishlist */}
                         <NavLink to="/wishlist" className="icon-btn wishlist-btn" aria-label="Wishlist">
                             <Heart size={20} />
-                            <span className="badge-dot"></span>
+                            {getWishlistCount() > 0 && (
+                                <span className="badge-dot wishlist-badge">{getWishlistCount()}</span>
+                            )}
                         </NavLink>
 
                         {/* User dropdown */}
@@ -236,6 +329,61 @@ const Navbar = () => {
             {/* Mobile overlay */}
             {mobileMenuOpen && (
                 <div className="mobile-overlay" onClick={() => setMobileMenuOpen(false)} />
+            )}
+
+            {/* Search Overlay */}
+            {searchOpen && (
+                <div className="search-overlay" ref={searchRef}>
+                    <div className="search-overlay-content">
+                        <form onSubmit={handleSearchSubmit} className="search-form">
+                            <Search size={20} className="search-form-icon" />
+                            <input
+                                ref={searchInputRef}
+                                type="text"
+                                className="search-input"
+                                placeholder="Search for products..."
+                                value={searchQuery}
+                                onChange={handleSearchChange}
+                                autoFocus
+                            />
+                            <button type="button" className="search-close-btn" onClick={toggleSearch}>
+                                <X size={20} />
+                            </button>
+                        </form>
+
+                        {searchResults.length > 0 && (
+                            <div className="search-results-dropdown">
+                                {searchResults.map((product) => (
+                                    <div
+                                        key={product.id}
+                                        className="search-result-item"
+                                        onClick={() => handleResultClick(product)}
+                                    >
+                                        <img src={product.image} alt={product.name} className="search-result-img" />
+                                        <div className="search-result-info">
+                                            <span className="search-result-name">{product.name}</span>
+                                            <span className="search-result-category">
+                                                {product.generalCategory} / {product.detailedCategory}
+                                            </span>
+                                        </div>
+                                        <span className="search-result-price">${product.new_price}</span>
+                                    </div>
+                                ))}
+                                <div className="search-result-footer" onClick={handleSearchSubmit}>
+                                    <Search size={14} />
+                                    <span>Search for "{searchQuery}"</span>
+                                </div>
+                            </div>
+                        )}
+
+                        {searchQuery.trim().length > 0 && searchResults.length === 0 && (
+                            <div className="search-no-results">
+                                <Search size={32} />
+                                <p>No products found for "{searchQuery}"</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
             )}
         </>
     );

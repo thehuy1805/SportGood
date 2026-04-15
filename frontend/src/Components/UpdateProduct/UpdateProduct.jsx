@@ -3,12 +3,186 @@ import { useParams, useNavigate } from 'react-router-dom';
 import './UpdateProduct.css';
 import API_BASE_URL from '../../config';
 
-const STATUS_OPTIONS = [
-  { value: 'available', label: 'Available' },
-  { value: 'low_stock', label: 'Few left' },
-  { value: 'out_of_stock', label: 'Out of stock' },
-];
+// 独立的 Update Modal 组件（用于 ListProduct 页面内联调用）
+export const UpdateProductModal = ({ product, onClose, onUpdated }) => {
+  const [form, setForm] = useState({
+    name: product.name || '',
+    old_price: product.old_price || '',
+    new_price: product.new_price || '',
+    description: product.description || '',
+    generalCategory: product.generalCategory || 'Men',
+    detailedCategory: product.detailedCategory || 'Club Jerseys',
+  });
+  const [image, setImage] = useState(null);
+  const [additionalImages, setAdditionalImages] = useState([]);
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
+  const detailedCategories = {
+    Men: ['Club Jerseys', 'National Team Jerseys', 'Basketball Clothing', 'Swimwear', 'Gym Sets', 'Soccer Shoes', 'Basketball Shoes'],
+    Women: ['Club Jerseys', 'National Team Jerseys', 'Basketball Clothing', 'Swimwear', 'Gym Sets', 'Soccer Shoes', 'Basketball Shoes'],
+    'Sports Equipment': ['Soccer Accessories', 'Basketball Accessories', 'Swimming Accessories'],
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm(prev => {
+      const next = { ...prev, [name]: value };
+      // 当 generalCategory 改变时，重置 detailedCategory
+      if (name === 'generalCategory') {
+        next.detailedCategory = detailedCategories[value][0];
+      }
+      return next;
+    });
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!form.name.trim()) newErrors.name = 'Product name is required';
+    if (!form.new_price || parseFloat(form.new_price) <= 0) newErrors.new_price = 'Price must be greater than 0';
+    if (form.old_price && parseFloat(form.old_price) > 0 && parseFloat(form.new_price) > parseFloat(form.old_price)) {
+      newErrors.new_price = 'Sale price cannot be higher than original price';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+    setLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('name', form.name);
+      formData.append('old_price', form.old_price);
+      formData.append('new_price', form.new_price);
+      formData.append('description', form.description);
+      formData.append('generalCategory', form.generalCategory);
+      formData.append('detailedCategory', form.detailedCategory);
+      if (image) formData.append('image', image);
+      additionalImages.forEach(img => formData.append('additionalImages', img));
+
+      const response = await fetch(`${API_BASE_URL}/updateproduct/${product.id}`, {
+        method: 'PUT',
+        body: formData,
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        onUpdated();
+        onClose();
+      } else {
+        alert(data.error || 'Update failed!');
+      }
+    } catch (error) {
+      console.error('Update error:', error);
+      alert('An error occurred while updating.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="upm-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="upm-dialog">
+        {/* Header */}
+        <div className="upm-header">
+          <h2 className="upm-title">Update Product</h2>
+          <button className="upm-close" onClick={onClose} title="Đóng">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="upm-body">
+          {/* Product Image */}
+          <div className="upm-image-section">
+            <div className="upm-image-preview">
+              <img src={image ? URL.createObjectURL(image) : product.image} alt={form.name} />
+            </div>
+            <div className="upm-image-hint">
+              <p>Current product image. Click the button below to change it.</p>
+              <label className="upm-file-input">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="16 16 12 12 8 16"></polyline>
+                  <line x1="12" y1="12" x2="12" y2="21"></line>
+                  <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
+                </svg>
+                Upload New Image
+                <input onChange={e => setImage(e.target.files[0])} type="file" accept="image/*" />
+              </label>
+            </div>
+          </div>
+
+          {/* Form fields */}
+          <div className="upm-field">
+            <label className="upm-label">Product Name</label>
+            <input name="name" value={form.name} onChange={handleChange} className="upm-input" placeholder="Enter product name" />
+            {errors.name && <span className="upm-error">{errors.name}</span>}
+          </div>
+
+          <div className="upm-row">
+            <div className="upm-field">
+              <label className="upm-label">Price ($)</label>
+              <input name="old_price" value={form.old_price} onChange={handleChange} type="number" className="upm-input" placeholder="0.00" />
+            </div>
+            <div className="upm-field">
+              <label className="upm-label">Offer Price ($)</label>
+              <input name="new_price" value={form.new_price} onChange={handleChange} type="number" className="upm-input" placeholder="0.00" />
+              {errors.new_price && <span className="upm-error">{errors.new_price}</span>}
+            </div>
+          </div>
+
+          <div className="upm-row">
+            <div className="upm-field">
+              <label className="upm-label">General Category</label>
+              <select name="generalCategory" value={form.generalCategory} onChange={handleChange} className="upm-select">
+                <option value="Men">Men</option>
+                <option value="Women">Women</option>
+                <option value="Sports Equipment">Sports Equipment</option>
+              </select>
+            </div>
+            <div className="upm-field">
+              <label className="upm-label">Detailed Category</label>
+              <select name="detailedCategory" value={form.detailedCategory} onChange={handleChange} className="upm-select">
+                {detailedCategories[form.generalCategory]?.map(cat => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="upm-field full-width">
+            <label className="upm-label">Product Description</label>
+            <textarea name="description" value={form.description} onChange={handleChange} className="upm-textarea" rows={3} placeholder="Enter detailed product description..." />
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="upm-footer">
+          <button className="upm-btn-cancel" onClick={onClose}>Cancel</button>
+          <button className="upm-btn-save" onClick={handleSubmit} disabled={loading}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            {loading ? 'Saving...' : 'Save Changes'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// =====================================================
+// =====================================================
+// UpdateProduct Page (standalone page - size editing removed)
+// =====================================================
+// =====================================================
 const UpdateProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -16,10 +190,7 @@ const UpdateProduct = () => {
     name: '', image: '', additionalImages: [],
     detailedCategory: '', generalCategory: '',
     new_price: '', old_price: '', description: '',
-    size: [],
   });
-  const [sizeStatus, setSizeStatus] = useState({});
-  const [seStatus, setSeStatus] = useState({ status: 'available', remainingQuantity: null });
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -30,14 +201,6 @@ const UpdateProduct = () => {
         const product = data.find((item) => item.id === parseInt(id));
         if (product) {
           setProductDetails(product);
-          const statusMap = product.sizeStatus || {};
-          const normalized = typeof statusMap === 'object' && !(statusMap instanceof Map)
-            ? statusMap
-            : Object.fromEntries(statusMap || new Map());
-          setSizeStatus(normalized);
-          if (normalized['__se__']) {
-            setSeStatus(normalized['__se__']);
-          }
         }
       } catch (error) {
         console.error('Error:', error);
@@ -45,23 +208,6 @@ const UpdateProduct = () => {
     };
     fetchProduct();
   }, [id]);
-
-  const sizes = productDetails.size || [];
-
-  const handleSizeStatusChange = (size, status) => {
-    setSizeStatus(prev => ({
-      ...prev,
-      [size]: { ...prev[size], status, remainingQuantity: status === 'low_stock' ? prev[size]?.remainingQuantity : null }
-    }));
-  };
-
-  const handleSizeQtyChange = (size, qty) => {
-    const val = qty === '' ? null : parseInt(qty, 10);
-    setSizeStatus(prev => ({
-      ...prev,
-      [size]: { ...prev[size], remainingQuantity: val }
-    }));
-  };
 
   const changeHandler = (e) => {
     setProductDetails({ ...productDetails, [e.target.name]: e.target.value });
@@ -83,21 +229,15 @@ const UpdateProduct = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (productDetails.name.trim() === '') newErrors.name = 'Product title is required';
+    if (productDetails.name.trim() === '') newErrors.name = 'Product name is required';
     const price = parseFloat(productDetails.old_price);
-    if (isNaN(price) || price <= 0) newErrors.old_price = 'Price must be positive';
+    if (isNaN(price) || price <= 0) newErrors.old_price = 'Price must be greater than 0';
     const offerPrice = parseFloat(productDetails.new_price);
-    if (isNaN(offerPrice) || offerPrice <= 0) newErrors.new_price = 'Offer price must be positive';
-    if (offerPrice > price) newErrors.new_price = 'Offer price cannot be higher than price';
+    if (isNaN(offerPrice) || offerPrice <= 0) newErrors.new_price = 'Offer price must be greater than 0';
+    if (offerPrice > price) newErrors.new_price = 'Offer price cannot be higher than original price';
     if (productDetails.description.trim() === '') newErrors.description = 'Description is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  const buildSizeStatus = () => {
-    const result = { ...sizeStatus };
-    result['__se__'] = seStatus;
-    return result;
   };
 
   const handleUpdate = async () => {
@@ -114,15 +254,10 @@ const UpdateProduct = () => {
       });
       const data = await response.json();
       if (data.success) {
-        await fetch(`${API_BASE_URL}/updatestock/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sizeStatus: buildSizeStatus() }),
-        });
         alert('Product updated successfully!');
         navigate('/admin/list-product');
       } else {
-        alert('Failed to update product!');
+        alert('Update failed!');
       }
     } catch (error) {
       console.error('Error:', error);
@@ -146,8 +281,8 @@ const UpdateProduct = () => {
 
       <div className="admin-card">
         <div className="admin-input-group">
-          <label className="admin-label">Product Title</label>
-          <input name="name" value={productDetails.name} onChange={changeHandler} type="text" className="admin-input" placeholder="Product title" />
+          <label className="admin-label">Product Name</label>
+          <input name="name" value={productDetails.name} onChange={changeHandler} type="text" className="admin-input" placeholder="Product name" />
           {errors.name && <span className="admin-error">{errors.name}</span>}
         </div>
 
@@ -189,89 +324,6 @@ const UpdateProduct = () => {
           {errors.description && <span className="admin-error">{errors.description}</span>}
         </div>
 
-        {/* ── Size Status Management (Clothes / Shoes) ── */}
-        {sizes.length > 0 && (
-          <div className="admin-input-group">
-            <label className="admin-label">Size Status</label>
-            <div className="up-size-grid">
-              {sizes.map(size => {
-                const entry = sizeStatus[size] || { status: 'available', remainingQuantity: null };
-                return (
-                  <div key={size} className="up-size-row">
-                    <span className="up-size-name">{size}</span>
-                    <select
-                      className="up-size-select"
-                      value={entry.status}
-                      onChange={(e) => handleSizeStatusChange(size, e.target.value)}
-                    >
-                      {STATUS_OPTIONS.map(opt => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                      ))}
-                    </select>
-                    {entry.status === 'low_stock' && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>Qty:</span>
-                        <input
-                          type="number"
-                          style={{
-                            width: 80, padding: '6px 10px', fontSize: 13, color: '#e2e8f0',
-                            border: '1.5px solid #334155', borderRadius: 8,
-                            background: '#0f172a', fontFamily: 'inherit', fontWeight: 600,
-                            outline: 'none',
-                          }}
-                          value={entry.remainingQuantity ?? ''}
-                          min={1}
-                          placeholder="e.g. 3"
-                          onChange={(e) => handleSizeQtyChange(size, e.target.value)}
-                        />
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* ── Sports Equipment Status ── */}
-        {productDetails.generalCategory === 'Sports Equipment' && (
-          <div className="admin-input-group">
-            <label className="admin-label">Stock Status</label>
-            <div className="up-size-grid">
-              <div className="up-size-row">
-                <span className="up-size-name" style={{ width: 60 }}>Total</span>
-                <select
-                  className="up-size-select"
-                  value={seStatus.status}
-                  onChange={(e) => setSeStatus(prev => ({ ...prev, status: e.target.value, remainingQuantity: e.target.value === 'low_stock' ? prev.remainingQuantity : null }))}
-                >
-                  {STATUS_OPTIONS.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
-                {seStatus.status === 'low_stock' && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>Qty:</span>
-                    <input
-                      type="number"
-                      style={{
-                        width: 80, padding: '6px 10px', fontSize: 13, color: '#e2e8f0',
-                        border: '1.5px solid #334155', borderRadius: 8,
-                        background: '#0f172a', fontFamily: 'inherit', fontWeight: 600,
-                        outline: 'none',
-                      }}
-                      value={seStatus.remainingQuantity ?? ''}
-                      min={1}
-                      placeholder="e.g. 5"
-                      onChange={(e) => setSeStatus(prev => ({ ...prev, remainingQuantity: e.target.value === '' ? null : parseInt(e.target.value, 10) }))}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
         <div className="image-container">
           <div className="admin-input-group">
             <label className="admin-label">Main Image</label>
@@ -291,7 +343,7 @@ const UpdateProduct = () => {
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
-            Update Product
+            Update
           </button>
           <button onClick={() => navigate('/admin/list-product')} className="cancel-product-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -307,3 +359,4 @@ const UpdateProduct = () => {
 };
 
 export default UpdateProduct;
+

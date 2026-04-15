@@ -23,6 +23,7 @@ import OrderConfirmationPage from './Pages/OrderConfirmationPage';
 import OrderHistoryPage from './Pages/OrderHistoryPage';
 import MyProfilePage from './Pages/MyProfilePage';
 import AddressBookPage from './Pages/AddressBookPage';
+import WishlistPage from './Pages/WishlistPage';
 import Footer from './Components/Footer/Footer';
 import men_banner from './Components/Assets/banner_mens.png';
 import women_banner_video from './Components/Assets/women_banner_video.mp4';
@@ -125,6 +126,14 @@ function AppContent() {
                 element={
                     <UserRoute>
                         <AddressBookPage />
+                    </UserRoute>
+                }
+            />
+            <Route
+                path='/wishlist'
+                element={
+                    <UserRoute>
+                        <WishlistPage />
                     </UserRoute>
                 }
             />

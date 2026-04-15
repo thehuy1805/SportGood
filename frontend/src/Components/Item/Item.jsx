@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import './Item.css';
 import { Link } from 'react-router-dom';
+import { ShopContext } from '../../Context/ShopContext';
+import { Heart } from 'lucide-react';
 
 const generateSlug = (name) => {
   return name.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
@@ -23,6 +25,8 @@ const StarIcon = ({ filled }) => (
 
 const Item = (props) => {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [addedToWishlist, setAddedToWishlist] = useState(false);
+  const { toggleWishlist, isInWishlist } = useContext(ShopContext);
 
   const averageRating = props.feedbacks && props.feedbacks.length > 0
     ? Math.round(props.feedbacks.reduce((sum, feedback) => sum + feedback.rating, 0) / props.feedbacks.length)
@@ -34,6 +38,16 @@ const Item = (props) => {
 
   const handleImageError = (e) => {
     e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Crect width='300' height='300' fill='%231e293b'/%3E%3Ctext x='50%25' y='50%25' textAnchor='middle' dy='.3em' fill='%2394a3b8' fontFamily='sans-serif' fontSize='14'%3ENo Image%3C/text%3E%3C/svg%3E";
+  };
+
+  const inWishlist = isInWishlist(props.id);
+
+  const handleWishlistClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWishlist(props.id);
+    setAddedToWishlist(true);
+    setTimeout(() => setAddedToWishlist(false), 600);
   };
 
   return (
@@ -73,6 +87,15 @@ const Item = (props) => {
               <span className="item-discount-value">-{discount}%</span>
             </div>
           )}
+
+          {/* Wishlist button */}
+          <button
+            className={`item-wishlist-btn ${inWishlist ? 'active' : ''} ${addedToWishlist ? 'animating' : ''}`}
+            onClick={handleWishlistClick}
+            aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+          >
+            <Heart size={16} fill={inWishlist ? '#f97316' : 'none'} stroke={inWishlist ? '#f97316' : 'currentColor'} />
+          </button>
         </div>
 
         {/* Details area */}

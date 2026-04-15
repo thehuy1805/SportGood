@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from './AuthContext';
 import io from 'socket.io-client';
 import API_BASE_URL from '../config';
@@ -10,8 +10,8 @@ export const ShopContextProvider = ({ children }) => {
     const [all_product, setAll_product] = useState([]);
     const [cart, setCart] = useState({});
     const [selectedSizes, setSelectedSizes] = useState({});
+    const [wishlist, setWishlist] = useState([]); // wishlist: array of productId numbers
     const { isLoggedIn, userName, userId, logout } = useContext(AuthContext);
-    const location = useLocation();
     const navigate = useNavigate();
 
     // Kết nối Socket.IO
@@ -123,6 +123,29 @@ useEffect(() => {
     };
 
     syncCartWithServer();
+}, [isLoggedIn]);
+
+// Fetch wishlist khi đăng nhập
+useEffect(() => {
+    const token = localStorage.getItem('auth-token');
+    if (!token) {
+        setWishlist([]);
+        return;
+    }
+    const loadWishlist = async () => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/wishlist`, {
+                headers: { 'auth-token': token }
+            });
+            const data = await res.json();
+            if (data.success) {
+                setWishlist(data.wishlist.map(item => Number(item.productId)));
+            }
+        } catch (error) {
+            console.error('Error fetching wishlist:', error);
+        }
+    };
+    loadWishlist();
 }, [isLoggedIn]);
 
 useEffect(() => {
@@ -324,6 +347,71 @@ const removeFromCart = (itemId, size) => {
             }
         }
     };
+
+    // ============================================================
+    // WISHLIST MANAGEMENT
+    // ============================================================
+
+    // Toggle wishlist: thêm nếu chưa có, xóa nếu đã có
+    const toggleWishlist = async (productId) => {
+        const pid = Number(productId);
+
+        if (!isLoggedIn) {
+            if (window.confirm('Bạn cần đăng nhập để thêm vào wishlist!')) {
+                navigate('/login');
+            }
+            return;
+        }
+
+        const token = localStorage.getItem('auth-token');
+        const isCurrentlyInWishlist = wishlist.includes(pid);
+
+        // Optimistic update - cập nhật UI ngay lập tức
+        if (isCurrentlyInWishlist) {
+            setWishlist(prev => prev.filter(id => id !== pid));
+        } else {
+            setWishlist(prev => [...prev, pid]);
+        }
+
+        try {
+            const endpoint = isCurrentlyInWishlist ? 'remove' : 'add';
+            const res = await fetch(`${API_BASE_URL}/wishlist/${endpoint}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'auth-token': token
+                },
+                body: JSON.stringify({ productId: pid })
+            });
+            const data = await res.json();
+            if (data.success) {
+                // Sync lại từ server để đảm bảo chính xác
+                setWishlist(data.wishlist.map(item => Number(item.productId)));
+            } else {
+                // Revert nếu server trả lỗi
+                if (isCurrentlyInWishlist) {
+                    setWishlist(prev => [...prev, pid]);
+                } else {
+                    setWishlist(prev => prev.filter(id => id !== pid));
+                }
+                if (data.error) {
+                    alert(data.error);
+                }
+            }
+        } catch (error) {
+            console.error('Error toggling wishlist:', error);
+            // Revert optimistic update
+            if (isCurrentlyInWishlist) {
+                setWishlist(prev => [...prev, pid]);
+            } else {
+                setWishlist(prev => prev.filter(id => id !== pid));
+            }
+        }
+    };
+
+    const isInWishlist = (productId) => wishlist.includes(Number(productId));
+
+    const getWishlistCount = () => wishlist.length;
     
 
     // Tính tổng số sản phẩm trong giỏ hàng
@@ -365,7 +453,11 @@ const removeFromCart = (itemId, size) => {
         userId,
         selectedSizes,
         cart,
-        updateCartItemQuantity 
+        updateCartItemQuantity,
+        wishlist,
+        toggleWishlist,
+        isInWishlist,
+        getWishlistCount,
     };
 
     return (

@@ -1,126 +1,136 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Footer.css';
 import footer_logo from '../Assets/main_logo.jpg';
 import instagram_icon from '../Assets/icon_instagram.png';
 import facebook_icon from '../Assets/facebook_icon.png';
 import tiktok_icon from '../Assets/tiktok_icon.png';
-import { MapPin, Phone, Mail, Clock, ArrowRight } from 'lucide-react';
 import { AuthContext } from '../../Context/AuthContext';
 
 const Footer = () => {
     const { role } = useContext(AuthContext);
     const isAdminOrStaff = role === 'admin' || role === 'staff';
+    const [email, setEmail] = useState('');
+    const [subscribed, setSubscribed] = useState(false);
 
     if (isAdminOrStaff) return null;
 
+    const handleSubscribe = (e) => {
+        e.preventDefault();
+        if (email) {
+            setSubscribed(true);
+            setEmail('');
+        }
+    };
+
     return (
         <footer className="footer">
-            {/* Top gradient bar */}
-            <div className="footer-top-bar"></div>
+            {/* Wave SVG */}
+            <div className="footer-wave">
+                <svg viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0,40 C240,80 480,0 720,40 C960,80 1200,0 1440,40 L1440,80 L0,80 Z" fill="#0d1117" />
+                </svg>
+            </div>
 
-            <div className="footer-container">
-                {/* Main Grid */}
-                <div className="footer-grid">
-                    {/* Column 1: Brand */}
-                    <div className="footer-brand">
-                        <div className="footer-logo">
-                            <div className="footer-logo-img">
-                                <img src={footer_logo} alt="Sports Stores" />
-                            </div>
-                            <div className="footer-logo-text">
-                                <span className="footer-logo-brand">SPORTS</span>
-                                <span className="footer-logo-store">STORES</span>
+            <div className="footer-body">
+                <div className="footer-inner">
+                    {/* Brand */}
+                    <div className="fc fc-brand">
+                        <div className="fc-logo">
+                            <img src={footer_logo} alt="Sports Stores" />
+                            <div>
+                                <span className="fc-logo-name">SPORTS</span>
+                                <span className="fc-logo-sub">STORES</span>
                             </div>
                         </div>
-                        <p className="footer-desc">
-                            Your ultimate destination for premium sports gear, apparel, and equipment. 
-                            Gear up and push your limits every day.
+                        <p className="fc-about">
+                            Your ultimate destination for premium sports gear — top quality, unlimited style, every day.
                         </p>
-                        <div className="footer-contact-items">
-                            <div className="footer-contact-item">
-                                <MapPin size={16} className="footer-contact-icon" />
+                        <div className="fc-socials">
+                            <a href="https://www.instagram.com/huypu_1805/" target="_blank" rel="noopener noreferrer" className="fc-social-btn" aria-label="Instagram">
+                                <img src={instagram_icon} alt="Instagram" />
+                            </a>
+                            <a href="https://www.facebook.com/profile.php?id=100007777727900" target="_blank" rel="noopener noreferrer" className="fc-social-btn" aria-label="Facebook">
+                                <img src={facebook_icon} alt="Facebook" />
+                            </a>
+                            <a href="https://www.tiktok.com/@huypham_1805" target="_blank" rel="noopener noreferrer" className="fc-social-btn" aria-label="TikTok">
+                                <img src={tiktok_icon} alt="TikTok" />
+                            </a>
+                        </div>
+                    </div>
+
+                    {/* Quick Links */}
+                    <div className="fc fc-links">
+                        <h4 className="fc-title">Navigation</h4>
+                        <ul>
+                            <li><Link to="/">Home</Link></li>
+                            <li><Link to="/men">Men</Link></li>
+                            <li><Link to="/women">Women</Link></li>
+                            <li><Link to="/sport-equipment">Sports Equipment</Link></li>
+                            <li><Link to="/cart">Cart</Link></li>
+                        </ul>
+                    </div>
+
+                    {/* Contact */}
+                    <div className="fc fc-contact">
+                        <h4 className="fc-title">Contact</h4>
+                        <div className="fc-contact-list">
+                            <div className="fc-contact-row">
+                                <span className="fc-contact-icon">📍</span>
                                 <span>123 Sports Ave, District 1, HCMC</span>
                             </div>
-                            <div className="footer-contact-item">
-                                <Phone size={16} className="footer-contact-icon" />
+                            <div className="fc-contact-row">
+                                <span className="fc-contact-icon">📞</span>
                                 <span>+84 123 456 789</span>
                             </div>
-                            <div className="footer-contact-item">
-                                <Mail size={16} className="footer-contact-icon" />
+                            <div className="fc-contact-row">
+                                <span className="fc-contact-icon">✉️</span>
                                 <span>contact@sportsstores.com</span>
                             </div>
-                            <div className="footer-contact-item">
-                                <Clock size={16} className="footer-contact-icon" />
-                                <span>Mon - Sat: 8:00 AM - 9:00 PM</span>
+                            <div className="fc-contact-row">
+                                <span className="fc-contact-icon">🕐</span>
+                                <span>Mon – Sat: 8:00 AM – 9:00 PM</span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Column 2: Newsletter */}
-                    <div className="footer-column footer-newsletter">
-                        <h3 className="footer-heading">Stay Updated</h3>
-                        <p className="footer-newsletter-text">
-                            Subscribe to get special offers, free giveaways, and exclusive deals.
-                        </p>
-                        <form className="footer-newsletter-form" onSubmit={(e) => e.preventDefault()}>
-                            <input
-                                type="email"
-                                placeholder="Enter your email"
-                                className="footer-newsletter-input"
-                            />
-                            <button type="submit" className="footer-newsletter-btn">
-                                <ArrowRight size={20} />
-                            </button>
-                        </form>
-                        <div className="footer-social">
-                            <span className="footer-social-label">Follow Us</span>
-                            <div className="footer-social-icons">
-                                <a
-                                    href="https://www.instagram.com/huypu_1805/"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="footer-social-icon"
-                                    aria-label="Instagram"
-                                >
-                                    <img src={instagram_icon} alt="Instagram" />
-                                </a>
-                                <a
-                                    href="https://www.facebook.com/profile.php?id=100007777727900"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="footer-social-icon"
-                                    aria-label="Facebook"
-                                >
-                                    <img src={facebook_icon} alt="Facebook" />
-                                </a>
-                                <a
-                                    href="https://www.tiktok.com/@huypham_1805"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="footer-social-icon"
-                                    aria-label="TikTok"
-                                >
-                                    <img src={tiktok_icon} alt="TikTok" />
-                                </a>
+                    {/* Newsletter */}
+                    <div className="fc fc-newsletter">
+                        <h4 className="fc-title">Stay Updated</h4>
+                        <p className="fc-newsletter-desc">Subscribe to get exclusive deals and the latest news.</p>
+                        {subscribed ? (
+                            <div className="fc-subscribed">
+                                <span>✅</span> Thank you for subscribing!
                             </div>
+                        ) : (
+                            <form className="fc-form" onSubmit={handleSubscribe}>
+                                <input
+                                    type="email"
+                                    placeholder="Your email address..."
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="fc-input"
+                                    required
+                                />
+                                <button type="submit" className="fc-submit">Subscribe</button>
+                            </form>
+                        )}
+                        <div className="fc-badges">
+                            <span className="fc-badge">🔒 SSL Secured</span>
+                            <span className="fc-badge">🚚 Free Shipping</span>
+                            <span className="fc-badge">↩️ 30-Day Returns</span>
                         </div>
                     </div>
                 </div>
 
-                {/* Divider */}
-                <div className="footer-divider"></div>
-
-                {/* Bottom Bar */}
+                {/* Bottom */}
                 <div className="footer-bottom">
-                    <p className="footer-copyright">
-                        &copy; {new Date().getFullYear()} <strong>Sports Stores</strong>. All rights reserved.
-                    </p>
+                    <span>© {new Date().getFullYear()} <strong>Sports Stores</strong>. All rights reserved.</span>
                     <div className="footer-bottom-links">
                         <a href="#">Privacy Policy</a>
-                        <span className="footer-dot"></span>
+                        <span>·</span>
                         <a href="#">Terms of Service</a>
-                        <span className="footer-dot"></span>
+                        <span>·</span>
                         <a href="#">Cookie Policy</a>
                     </div>
                 </div>

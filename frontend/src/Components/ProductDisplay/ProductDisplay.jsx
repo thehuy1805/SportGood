@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import './ProductDisplay.css';
 import { ShopContext } from '../../Context/ShopContext';
 import useProductStore from '../../store/productStore';
-import { ShoppingCart, ChevronRight, Package, ShieldCheck, Truck, RotateCcw } from 'lucide-react';
+import { ShoppingCart, ChevronRight, Package, ShieldCheck, Truck, RotateCcw, Heart } from 'lucide-react';
 
 const SHOE_CATEGORIES = ['Soccer Shoes', 'Basketball Shoes'];
 
@@ -22,13 +22,16 @@ const STATUS_LABEL = {
 };
 
 const ProductDisplay = ({ product, feedbacks }) => {
-  const { addToCart, isLoggedIn } = useContext(ShopContext);
+  const { addToCart, isLoggedIn, toggleWishlist, isInWishlist } = useContext(ShopContext);
   const navigate = useNavigate();
   const location = useLocation();
   const [mainImage, setMainImage] = useState(product ? product.image : '');
   const [selectedSize, setSelectedSize] = useState(null);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [wishlistAnimating, setWishlistAnimating] = useState(false);
   const setSelectedProduct = useProductStore(state => state.setSelectedProduct);
+
+  const inWishlist = isInWishlist(product?.id);
 
   useEffect(() => {
     if (product) setSelectedProduct(product);
@@ -64,25 +67,39 @@ const ProductDisplay = ({ product, feedbacks }) => {
     }
   };
 
-  const handleAddToCart = () => {
-    if (!isLoggedIn) {
-      if (window.confirm('You need to login to add products to cart!!')) {
-        localStorage.setItem('returnAfterLogin', location.pathname);
-        navigate('/login');
-      }
-      return;
-    }
+    const handleAddToCart = () => {
+        if (!isLoggedIn) {
+            if (window.confirm('You need to login to add products to cart!!')) {
+                localStorage.setItem('returnAfterLogin', location.pathname);
+                navigate('/login');
+            }
+            return;
+        }
 
-    if (!isSports && !selectedSize) {
-      alert('Vui lòng chọn size trước khi thêm vào giỏ hàng.');
-      return;
-    }
+        if (!isSports && !selectedSize) {
+            alert('Vui lòng chọn size trước khi thêm vào giỏ hàng.');
+            return;
+        }
 
-    const size = isSports ? 'default' : selectedSize;
-    addToCart(product.id, size);
-    setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 2000);
-  };
+        const size = isSports ? 'default' : selectedSize;
+        addToCart(product.id, size);
+        setAddedToCart(true);
+        setTimeout(() => setAddedToCart(false), 2000);
+    };
+
+    const handleAddToWishlist = (e) => {
+        e.stopPropagation();
+        if (!isLoggedIn) {
+            if (window.confirm('You need to login to add products to wishlist!!')) {
+                localStorage.setItem('returnAfterLogin', location.pathname);
+                navigate('/login');
+            }
+            return;
+        }
+        toggleWishlist(product.id);
+        setWishlistAnimating(true);
+        setTimeout(() => setWishlistAnimating(false), 600);
+    };
 
   const isAddToCartDisabled = () => {
     if (isSports) {
@@ -247,6 +264,13 @@ const ProductDisplay = ({ product, feedbacks }) => {
             >
               <ShoppingCart size={18} />
               <span>{addedToCart ? 'Added!' : 'Add to Cart'}</span>
+            </button>
+            <button
+              className={`pd-btn-wishlist ${inWishlist ? 'pd-btn-wishlist-active' : ''} ${wishlistAnimating ? 'animating' : ''}`}
+              onClick={handleAddToWishlist}
+              aria-label="Add to wishlist"
+            >
+              <Heart size={18} fill={inWishlist ? '#f97316' : 'none'} stroke={inWishlist ? '#f97316' : 'currentColor'} />
             </button>
           </div>
 

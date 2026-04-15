@@ -111,7 +111,7 @@ app.use((req, res, next) => {
         try {
             storage = new CloudinaryStorage({
                 cloudinary: cloudinary,
-                params: {
+                params: {       
                     folder: 'sportstores',
                     allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'svg'],
                     transformation: [{ width: 800, height: 800, crop: 'limit' }],
@@ -591,7 +591,17 @@ app.get('/getProductsByCategory', async (req, res) => {
             },
             otpExpiration: {
                 type: Date
-            }
+            },
+            wishlist: [{
+                productId: {
+                    type: Number,
+                    required: true
+                },
+                addedAt: {
+                    type: Date,
+                    default: Date.now
+                }
+            }]
         });
         const Users = mongoose.model('Users', userSchema);
         
@@ -1455,15 +1465,150 @@ app.post('/checkout', fetchUser, async (req, res) => {
 
 
 
+// ============================================================
+// WISHLIST API
+// ============================================================
+
+// Thêm sản phẩm vào wishlist
+app.post('/wishlist/add', fetchUser, async (req, res) => {
+    try {
+        const { productId } = req.body;
+        if (!productId) {
+            return res.status(400).json({ success: false, error: 'Product ID is required' });
+        }
+
+        const user = await Users.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        // Kiểm tra sản phẩm đã có trong wishlist chưa
+        const exists = user.wishlist.some(item => item.productId === Number(productId));
+        if (exists) {
+            return res.status(400).json({ success: false, error: 'Product already in wishlist' });
+        }
+
+        user.wishlist.push({ productId: Number(productId) });
+        await user.save();
+
+        res.json({ success: true, message: 'Added to wishlist', wishlist: user.wishlist });
+    } catch (error) {
+        console.error('Error adding to wishlist:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// Xóa sản phẩm khỏi wishlist
+app.post('/wishlist/remove', fetchUser, async (req, res) => {
+    try {
+        const { productId } = req.body;
+        if (!productId) {
+            return res.status(400).json({ success: false, error: 'Product ID is required' });
+        }
+
+        const user = await Users.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        user.wishlist = user.wishlist.filter(item => item.productId !== Number(productId));
+        await user.save();
+
+        res.json({ success: true, message: 'Removed from wishlist', wishlist: user.wishlist });
+    } catch (error) {
+        console.error('Error removing from wishlist:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// Lấy danh sách wishlist (chỉ trả về productId)
+app.get('/wishlist', fetchUser, async (req, res) => {
+    try {
+        const user = await Users.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        res.json({ success: true, wishlist: user.wishlist });
+    } catch (error) {
+        console.error('Error fetching wishlist:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// Lấy danh sách wishlist kèm thông tin sản phẩm đầy đủ
+app.get('/wishlist/full', fetchUser, async (req, res) => {
+    try {
+        const user = await Users.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        const productIds = user.wishlist.map(item => item.productId);
+        const products = await Product.find({ id: { $in: productIds } });
+
+        // Sắp xếp theo thứ tự trong wishlist
+        const productMap = Object.fromEntries(products.map(p => [p.id, p]));
+        const wishlistProducts = user.wishlist
+            .map(item => productMap[item.productId])
+            .filter(Boolean);
+
+        res.json({ success: true, products: wishlistProducts });
+    } catch (error) {
+        console.error('Error fetching wishlist with products:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// Kiểm tra sản phẩm có trong wishlist không
+app.get('/wishlist/check/:productId', fetchUser, async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const user = await Users.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        const exists = user.wishlist.some(item => item.productId === Number(productId));
+        res.json({ success: true, inWishlist: exists });
+    } catch (error) {
+        console.error('Error checking wishlist:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+// Xóa toàn bộ wishlist
+app.delete('/wishlist/clear', fetchUser, async (req, res) => {
+    try {
+        const user = await Users.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+
+        user.wishlist = [];
+        await user.save();
+
+        res.json({ success: true, message: 'Wishlist cleared' });
+    } catch (error) {
+        console.error('Error clearing wishlist:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
+
+
+// ============================================================
+// ENDPOINTS: ORDER HISTORY / GET-ORDERS (existing)
+// ============================================================
+
     // Endpoint lấy danh sách đơn hàng của người dùng
     app.get('/get-orders', fetchUser, async (req, res) => {
         try {
-            const orders = await Order.find({ userId: req.user.id }); 
+            const orders = await Order.find({ userId: req.user.id });
             res.json(orders);
         } catch (error) {
             console.error('Error fetching orders:', error);
-            res.status(500).json({ error: 'An error occurred while fetching orders.'   
-    });
+            res.status(500).json({ error: 'An error occurred while fetching orders.'   });
         }
     });
 
