@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './ManageAccountsPage.css';
+import { toast } from 'react-toastify';
 import API_BASE_URL from '../../config';
 
 const ManageAccountsPage = () => {
@@ -51,14 +52,14 @@ const ManageAccountsPage = () => {
             });
             if (response.ok) {
                 setUsers(users.filter(u => u._id !== userId));
-                alert('Account deleted successfully!');
+                toast.success('Account deleted successfully!');
             } else {
                 const data = await response.json();
-                alert(data.error || 'Failed to delete account');
+                toast.error(data.error || 'Failed to delete account');
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('An error occurred.');
+            toast.error('An error occurred.');
         }
     };
 
@@ -93,14 +94,14 @@ const ManageAccountsPage = () => {
                 } else {
                     setUsers(users.map(u => u._id === editingUser._id ? { ...u, ...formData } : u));
                 }
-                alert(editingUser._id ? 'Account updated!' : 'Account created!');
+                toast.success(editingUser._id ? 'Account updated!' : 'Account created!');
                 setShowModal(false);
             } else {
-                alert(data.error || 'Operation failed');
+                toast.error(data.error || 'Operation failed');
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('An error occurred.');
+            toast.error('An error occurred.');
         }
     };
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './AddProduct.css';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import API_BASE_URL from '../../config';
 
 export const AddProduct = () => {
@@ -90,18 +91,18 @@ export const AddProduct = () => {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
             if (response.data.success) {
-                alert('Product added successfully!');
+                toast.success('Product added successfully!');
                 setProductDetails({
                     name: '', image: '', detailedCategory: 'Club Jerseys',
                     generalCategory: 'Men', new_price: '', old_price: '', description: '',
                 });
                 setImages([]);
             } else {
-                alert('Failed to add product');
+                toast.error('Failed to add product');
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('An error occurred');
+            toast.error('An error occurred');
         }
     };
 

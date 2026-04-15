@@ -309,32 +309,32 @@
 }
 
 .security-change-btn {
-  padding: 7px 16px;
-  background: rgba(249, 115, 22, 0.08);
-  color: #f97316;
-  border: 1px solid rgba(249, 115, 22, 0.2);
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
+  display: none;
 }
 
-.security-change-btn:hover {
-  background: rgba(249, 115, 22, 0.15);
-  border-color: rgba(249, 115, 22, 0.3);
-}
-
-/* ---------- Password Form ---------- */
-.password-form {
-  margin-top: 18px;
-  padding-top: 18px;
-  border-top: 1px solid #f1f5f9;
+/* ---------- Security Hint ---------- */
+.security-hint {
   display: flex;
-  flex-direction: column;
-  gap: 14px;
-  animation: fadeSlideIn 0.25s ease;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(249, 115, 22, 0.05);
+  border: 1px solid rgba(249, 115, 22, 0.15);
+  border-radius: 10px;
+  margin-top: 16px;
+}
+
+.security-hint svg {
+  color: #f97316;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.security-hint span {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+  line-height: 1.5;
 }
 
 /* ---------- Loading ---------- */

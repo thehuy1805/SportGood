@@ -16,6 +16,7 @@ const CartItems = () => {
     const navigate = useNavigate();
     const [totalAmount, setTotalAmount] = useState(0);
     const [soldOutItems, setSoldOutItems] = useState({});
+    const shippingCost = totalAmount >= 100 ? 0 : 15;
 
     useEffect(() => {
         const checkSoldOutItems = () => {
@@ -259,9 +260,13 @@ const CartItems = () => {
                                     <div className="summary-row">
                                         <span className="summary-label">
                                             Shipping
-                                            <span className="summary-label-hint">Free</span>
+                                            {shippingCost === 0 && (
+                                                <span className="summary-label-hint">Free</span>
+                                            )}
                                         </span>
-                                        <span className="summary-value summary-free">$0.00</span>
+                                        <span className={`summary-value ${shippingCost === 0 ? 'summary-free' : ''}`}>
+                                            {shippingCost === 0 ? '$0.00' : `$${shippingCost.toFixed(2)}`}
+                                        </span>
                                     </div>
                                     <div className="summary-row">
                                         <span className="summary-label">Tax</span>
@@ -273,7 +278,7 @@ const CartItems = () => {
 
                                 <div className="summary-total-row">
                                     <span className="summary-total-label">Total</span>
-                                    <span className="summary-total-value">${totalAmount.toFixed(2)}</span>
+                                    <span className="summary-total-value">${(totalAmount + shippingCost).toFixed(2)}</span>
                                 </div>
 
                                 <button

@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from './AuthContext';
+import { toast } from 'react-toastify';
 import io from 'socket.io-client';
 import API_BASE_URL from '../config';
 
@@ -10,14 +11,14 @@ export const ShopContextProvider = ({ children }) => {
     const [all_product, setAll_product] = useState([]);
     const [cart, setCart] = useState({});
     const [selectedSizes, setSelectedSizes] = useState({});
-    const [wishlist, setWishlist] = useState([]); // wishlist: array of productId numbers
+    const [wishlist, setWishlist] = useState([]); // Danh sách yêu thích: mảng các productId
     const { isLoggedIn, userName, userId, logout } = useContext(AuthContext);
     const navigate = useNavigate();
 
     // Kết nối Socket.IO
     const socket = io(API_BASE_URL);
 
-    // Fetch all products
+    // Lấy tất cả sản phẩm
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -32,7 +33,7 @@ export const ShopContextProvider = ({ children }) => {
         fetchData();
     }, []);
 
-    // Socket: refresh all_product khi staff cập nhật kho
+    // Socket: làm mới all_product khi nhân viên cập nhật kho
     useEffect(() => {
         const refreshProducts = async () => {
             try {
@@ -52,7 +53,7 @@ export const ShopContextProvider = ({ children }) => {
         localStorage.setItem('cart', JSON.stringify(cart));
     }, [cart]);
 
-    // Lấy giỏ hàng từ localStorage khi trang được tải lại
+    // Lấy giỏ hàng từ localStorage khi trang tải lại
     useEffect(() => {
         const storedCart = localStorage.getItem('cart');
         if (storedCart) {
@@ -62,7 +63,7 @@ export const ShopContextProvider = ({ children }) => {
     }, []);
 
 
- // Đồng bộ giỏ hàng với server khi người dùng đã đăng nhập
+ // Đồng bộ giỏ hàng với server khi người dùng đăng nhập
 useEffect(() => {
     const syncCartWithServer = async () => {
         if (isLoggedIn) {
@@ -82,10 +83,10 @@ useEffect(() => {
                     // Lấy giỏ hàng từ localStorage
                     const localCart = JSON.parse(localStorage.getItem('cart')) || {};
 
-                    // Merge giỏ hàng
+                    // Gộp giỏ hàng
                     const mergedCart = { ...serverCart };
 
-                    // Thêm các sản phẩm từ local cart vào merged cart
+                    // Thêm sản phẩm từ giỏ hàng cục bộ vào giỏ hàng đã gộp
                     for (const productId in localCart) {
                         if (!mergedCart[productId]) {
                             mergedCart[productId] = localCart[productId];
@@ -125,7 +126,7 @@ useEffect(() => {
     syncCartWithServer();
 }, [isLoggedIn]);
 
-// Fetch wishlist khi đăng nhập
+// Lấy danh sách yêu thích khi đăng nhập
 useEffect(() => {
     const token = localStorage.getItem('auth-token');
     if (!token) {
@@ -154,7 +155,7 @@ useEffect(() => {
             return prevProducts.map(product => {
                 const updated = updatedProducts.find(p => p.id === product.id);
                 if (updated) {
-                    // Deep copy to ensure we update sizeStatus correctly
+                    // Sao chép sâu để đảm bảo cập nhật sizeStatus đúng
                     const updatedProduct = { ...product };
                     if (updated.sizeStatus) {
                         updatedProduct.sizeStatus = updated.sizeStatus;
@@ -183,7 +184,7 @@ useEffect(() => {
 
     socket.on('categoriesUpdated', handleCategoriesUpdated);
 
-    // Dọn dẹp lắng nghe sự kiện khi component unmount
+    // Dọn dẹp event listeners khi component unmount
     return () => {
         socket.off('stockUpdated', handleStockUpdate);
         socket.off('categoriesUpdated', handleCategoriesUpdated);
@@ -202,7 +203,7 @@ useEffect(() => {
                         delete updatedCart[itemId][size];
                     }
                     if (Object.keys(updatedCart[itemId]).length === 0) {
-                        delete updatedCart[itemId]; // Xóa sản phẩm nếu không còn size nào
+                        delete updatedCart[itemId]; // Xóa sản phẩm nếu không còn kích thước nào
                     }
                 }
             } else {
@@ -212,7 +213,7 @@ useEffect(() => {
                 updatedCart[itemId][size] = quantity;
             }
 
-            // Cập nhật lại localStorage ngay sau khi thay đổi giỏ hàng
+            // Cập nhật localStorage ngay sau khi giỏ hàng thay đổi
             localStorage.setItem('cart', JSON.stringify(updatedCart));
             return updatedCart;
         });
@@ -236,10 +237,10 @@ useEffect(() => {
             return updatedCart;
         });
 
-        // Đồng bộ giỏ hàng với server nếu người dùng đã đăng nhập
+        // Sync cart with server if user is logged in
         if (isLoggedIn) {
             try {
-                // Lấy toàn bộ giỏ hàng hiện tại
+                // Lấy giỏ hàng hiện tại đầy đủ
                 const token = localStorage.getItem('auth-token');
                 const cartResponse = await fetch(`${API_BASE_URL}/getcart`, {
                     method: 'GET',
@@ -250,7 +251,7 @@ useEffect(() => {
                 });
                 const serverCart = await cartResponse.json();
 
-                // Tạo bản sao của giỏ hàng từ server
+                // Tạo bản sao giỏ hàng từ server
                 const updatedServerCart = { ...serverCart };
 
                 // Cập nhật số lượng sản phẩm
@@ -260,7 +261,7 @@ useEffect(() => {
                 updatedServerCart[itemId][effectiveSize] =
                     (updatedServerCart[itemId][effectiveSize] || 0) + 1;
 
-                // Gửi giỏ hàng đã cập nhật lên server
+                // Gửi giỏ hàng đã cập nhật đến server
                 await fetch(`${API_BASE_URL}/updatecart`, {
                     method: 'PUT',
                     headers: {
@@ -285,12 +286,12 @@ const removeFromCart = (itemId, size) => {
             // Giảm số lượng
             updatedCart[itemId][size] -= 1;
 
-            // Nếu số lượng của size này về 0
+            // Nếu số lượng kích thước này bằng 0
             if (updatedCart[itemId][size] === 0) {
-                // Xóa size này
+                // Xóa kích thước này
                 delete updatedCart[itemId][size];
 
-                // Nếu không còn size nào cho sản phẩm này, xóa luôn sản phẩm
+                // Nếu không còn kích thước nào cho sản phẩm này, xóa sản phẩm
                 if (Object.keys(updatedCart[itemId]).length === 0) {
                     delete updatedCart[itemId];
                 }
@@ -305,7 +306,7 @@ const removeFromCart = (itemId, size) => {
         return prevCart;
     });
 
-    // Nếu đang đăng nhập, cập nhật cart trên server
+    // Nếu đã đăng nhập, cập nhật giỏ hàng trên server
     if (isLoggedIn) {
         try {
             const token = localStorage.getItem('auth-token');
@@ -329,10 +330,10 @@ const removeFromCart = (itemId, size) => {
         setCart({});
         setSelectedSizes({});
 
-        // Cập nhật lại localStorage ngay lập tức khi giỏ hàng bị xóa
+        // Cập nhật localStorage ngay khi giỏ hàng bị xóa
         localStorage.setItem('cart', JSON.stringify({}));
 
-        // Đồng bộ giỏ hàng với server nếu người dùng đã đăng nhập
+        // Sync cart with server if user is logged in
         if (isLoggedIn) {
             try {
                 await fetch(`${API_BASE_URL}/clearcart`, {
@@ -349,15 +350,15 @@ const removeFromCart = (itemId, size) => {
     };
 
     // ============================================================
-    // WISHLIST MANAGEMENT
+    // QUẢN LÝ DANH SÁCH YÊU THÍCH
     // ============================================================
 
-    // Toggle wishlist: thêm nếu chưa có, xóa nếu đã có
+    // Bật/tắt yêu thích: thêm nếu chưa có, xóa nếu đã có
     const toggleWishlist = async (productId) => {
         const pid = Number(productId);
 
         if (!isLoggedIn) {
-            if (window.confirm('Bạn cần đăng nhập để thêm vào wishlist!')) {
+            if (window.confirm('Please log in to add products to your wishlist!')) {
                 navigate('/login');
             }
             return;
@@ -366,8 +367,8 @@ const removeFromCart = (itemId, size) => {
         const token = localStorage.getItem('auth-token');
         const isCurrentlyInWishlist = wishlist.includes(pid);
 
-        // Optimistic update - cập nhật UI ngay lập tức
-        if (isCurrentlyInWishlist) {
+            // Cập nhật UI ngay lập tức
+            if (isCurrentlyInWishlist) {
             setWishlist(prev => prev.filter(id => id !== pid));
         } else {
             setWishlist(prev => [...prev, pid]);
@@ -385,22 +386,22 @@ const removeFromCart = (itemId, size) => {
             });
             const data = await res.json();
             if (data.success) {
-                // Sync lại từ server để đảm bảo chính xác
+                // Đồng bộ lại từ server để đảm bảo chính xác
                 setWishlist(data.wishlist.map(item => Number(item.productId)));
             } else {
-                // Revert nếu server trả lỗi
+                // Hoàn nguyên nếu server trả về lỗi
                 if (isCurrentlyInWishlist) {
                     setWishlist(prev => [...prev, pid]);
                 } else {
                     setWishlist(prev => prev.filter(id => id !== pid));
                 }
                 if (data.error) {
-                    alert(data.error);
+                    toast.error(data.error);
                 }
             }
         } catch (error) {
             console.error('Error toggling wishlist:', error);
-            // Revert optimistic update
+            // Hoàn nguyên cập nhật UI
             if (isCurrentlyInWishlist) {
                 setWishlist(prev => [...prev, pid]);
             } else {
@@ -439,7 +440,7 @@ const removeFromCart = (itemId, size) => {
         return amount;
     };
 
-    // Context value
+    // Giá trị context
     const contextValue = {
         getTotalCartAmount,
         all_product,

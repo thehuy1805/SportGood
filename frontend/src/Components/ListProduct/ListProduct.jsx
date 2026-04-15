@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './ListProduct.css';
+import { toast } from 'react-toastify';
 import API_BASE_URL from '../../config';
 import { UpdateProductModal } from '../UpdateProduct/UpdateProduct';
 
@@ -9,7 +10,7 @@ const ListProduct = () => {
   const [productsPerPage] = useState(12);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [updatingProduct, setUpdatingProduct] = useState(null); // Product being edited in modal
+  const [updatingProduct, setUpdatingProduct] = useState(null); // Sản phẩm đang được chỉnh sửa trong modal
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -38,13 +39,13 @@ const ListProduct = () => {
         const updated = products.filter(p => p.id !== productId);
         setProducts(updated);
         setFilteredProducts(updated);
-        alert('Product deleted successfully!');
+        toast.success('Product deleted successfully!');
       } else {
-        alert('Failed to delete product.');
+        toast.error('Failed to delete product.');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('An error occurred.');
+      toast.error('An error occurred.');
     }
   };
 
@@ -228,7 +229,7 @@ const ListProduct = () => {
           product={updatingProduct}
           onClose={() => setUpdatingProduct(null)}
           onUpdated={() => {
-            // Refresh product list after update
+            // Làm mới danh sách sản phẩm sau khi cập nhật
             const fetchProducts = async () => {
               try {
                 const response = await fetch(`${API_BASE_URL}/allproducts`);

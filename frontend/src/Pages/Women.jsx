@@ -1,4 +1,4 @@
-// Women.jsx
+// Trang Women.jsx
 import React, { useState, useRef, useEffect } from 'react';
 
 import WomenProduct from '../Components/WomenProduct/WomenProduct'; 
@@ -6,7 +6,7 @@ import KeywordSearch from '../Components/KeywordSearch/KeywordSearch';
 import SortByPrice from '../Components/SortByPrice/SortByPrice';
 import ProductCategory from '../Components/ProductCategory/ProductCategory';
 import './CSS/Women.css';
-import women_banner from '../Components/Assets/women_banner.png'; // Thay bằng hình ảnh banner của Women
+import women_banner from '../Components/Assets/women_banner.png'; // Ảnh banner nữ
 
 export const Women = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -38,12 +38,12 @@ export const Women = () => {
     };
 
     return (
-        <div className="women-container"> {/* Thay đổi className */}
-            <div className="women-banner"> {/* Thay đổi className */}
+        <div className="women-container">
+            <div className="women-banner">
                 <img src={women_banner} alt="Banner" />
             </div>
-            <div className="women-content"> {/* Thay đổi className */}
-                <div className="sidebar-women"> {/* Thay đổi className */}
+            <div className="women-content">
+                <div className="sidebar-women">
                     <KeywordSearch onSearch={term => { handleBeforeChange(); handleSearch(term); }} />
                     <SortByPrice 
                         onSortChange={sortOption => { handleBeforeChange(); handleSortChange(sortOption); }} 

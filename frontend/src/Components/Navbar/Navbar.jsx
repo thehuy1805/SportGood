@@ -12,9 +12,11 @@ const Navbar = () => {
     const { getTotalCartItems, getWishlistCount } = useContext(ShopContext);
     const { logout, userName, userId } = useContext(AuthContext);
     const userMenuRef = useRef();
+    const menuRef = useRef(); // wrapper dropdown
     const [isLoading, setIsLoading] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
+    const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const searchInputRef = useRef(null);
@@ -32,16 +34,12 @@ const Navbar = () => {
         }, 500);
     };
 
-    const userMenu_toggle = () => {
-        userMenuRef.current.classList.toggle('user-menu-visible');
-    };
-
     const handleLogout = () => {
         logout();
         window.location.replace('/');
     };
 
-    // Search overlay toggle
+    // Bật/tắt overlay tìm kiếm
     const toggleSearch = () => {
         setSearchOpen(!searchOpen);
         if (!searchOpen) {
@@ -53,22 +51,25 @@ const Navbar = () => {
         }
     };
 
-    // Close search when clicking outside
+    // Đóng user menu khi click bên ngoài
     useEffect(() => {
         const handleClickOutside = (e) => {
+            if (menuRef.current && !menuRef.current.contains(e.target)) {
+                setUserMenuOpen(false);
+            }
             if (searchRef.current && !searchRef.current.contains(e.target)) {
                 setSearchOpen(false);
                 setSearchQuery('');
                 setSearchResults([]);
             }
         };
-        if (searchOpen) {
+        if (searchOpen || userMenuOpen) {
             document.addEventListener('mousedown', handleClickOutside);
         }
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [searchOpen]);
+    }, [searchOpen, userMenuOpen]);
 
-    // Handle escape key
+    // Xử lý phím escape
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === 'Escape' && searchOpen) {
@@ -81,7 +82,7 @@ const Navbar = () => {
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [searchOpen]);
 
-    // Search logic
+    // Logic tìm kiếm
     const { all_product } = useContext(ShopContext);
 
     const handleSearchChange = (e) => {
@@ -208,10 +209,11 @@ const Navbar = () => {
                         </NavLink>
 
                         {/* User dropdown */}
-                        <div className="user-dropdown">
+                        <div className="user-dropdown" ref={menuRef}>
                             <button
-                                onClick={userMenu_toggle}
-                                className={`profile-button ${userMenuRef.current?.classList.contains('user-menu-visible') ? 'active' : ''}`}
+                                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                                className={`profile-button ${userMenuOpen ? 'active' : ''}`}
+                                onMouseEnter={() => setUserMenuOpen(true)}
                             >
                                 <div className="profile-avatar">
                                     <img src={user_icon} alt="User" />
@@ -233,7 +235,8 @@ const Navbar = () => {
 
                             <div
                                 ref={userMenuRef}
-                                className="user-menu"
+                                className={`user-menu ${userMenuOpen ? 'user-menu-visible' : ''}`}
+                                onMouseEnter={() => setUserMenuOpen(true)}
                             >
                                 <div className="menu-header">
                                     <User className="menu-icon" />
@@ -248,7 +251,7 @@ const Navbar = () => {
                                             to='/login'
                                             className="menu-item menu-item-primary"
                                             onClick={() => {
-                                                userMenu_toggle();
+                                                setUserMenuOpen(false);
                                                 setMobileMenuOpen(false);
                                             }}
                                         >
@@ -261,7 +264,7 @@ const Navbar = () => {
                                                 to='/order-history'
                                                 className="menu-item"
                                                 onClick={() => {
-                                                    userMenu_toggle();
+                                                    setUserMenuOpen(false);
                                                     setMobileMenuOpen(false);
                                                 }}
                                             >
@@ -272,7 +275,7 @@ const Navbar = () => {
                                                 to='/my-profile'
                                                 className="menu-item"
                                                 onClick={() => {
-                                                    userMenu_toggle();
+                                                    setUserMenuOpen(false);
                                                     setMobileMenuOpen(false);
                                                 }}
                                             >
@@ -283,7 +286,7 @@ const Navbar = () => {
                                                 to='/address-book'
                                                 className="menu-item"
                                                 onClick={() => {
-                                                    userMenu_toggle();
+                                                    setUserMenuOpen(false);
                                                     setMobileMenuOpen(false);
                                                 }}
                                             >
@@ -294,7 +297,7 @@ const Navbar = () => {
                                                 to='/size-guide'
                                                 className="menu-item"
                                                 onClick={() => {
-                                                    userMenu_toggle();
+                                                    setUserMenuOpen(false);
                                                     setMobileMenuOpen(false);
                                                 }}
                                             >

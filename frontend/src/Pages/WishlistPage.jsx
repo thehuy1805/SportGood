@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShopContext } from '../Context/ShopContext';
 import { Heart, ShoppingCart, Trash2, ArrowLeft, ShoppingBag } from 'lucide-react';
+import { toast } from 'react-toastify';
 import API_BASE_URL from '../config';
 import './WishlistPage.css';
 
@@ -45,7 +46,7 @@ const WishlistPage = () => {
     const handleAddToCart = (e, product) => {
         e.stopPropagation();
         if (!isLoggedIn) {
-            if (window.confirm('Bạn cần đăng nhập để thêm vào giỏ hàng!')) {
+            if (window.confirm('Please log in to add products to your wishlist!')) {
                 navigate('/login');
             }
             return;
@@ -53,7 +54,7 @@ const WishlistPage = () => {
 
         const effectiveSize = product.generalCategory === 'Sports Equipment' ? 'default' : null;
         if (effectiveSize === null && product.generalCategory !== 'Sports Equipment') {
-            alert('Vui lòng chọn size trước khi thêm vào giỏ hàng.');
+            toast.warn('Please select a size before adding to cart.');
             return;
         }
 

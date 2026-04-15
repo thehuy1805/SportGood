@@ -13,11 +13,11 @@ const http = require('http');
 const socketIo = require('socket.io');
 const fetch = require('node-fetch');
 const Message = require('./models/Message');
-// Cloudinary configuration
+// Cấu hình Cloudinary
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-// Kiểm tra và log Cloudinary credentials
+// Kiểm tra và log thông tin xác thực Cloudinary
 console.log('Cloudinary config check:');
 console.log('- CLOUDINARY_CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME ? '✅ Set' : '❌ Missing');
 console.log('- CLOUDINARY_API_KEY:', process.env.CLOUDINARY_API_KEY ? '✅ Set' : '❌ Missing');
@@ -47,7 +47,7 @@ cloudinary.config({
         app.use(express.json());
         const corsOptions = {
     origin: function (origin, callback) {
-        // Danh sách các origin được phép
+        // Danh sách nguồn được phép
         const allowedOrigins = [
             'http://localhost:3000',
             'http://localhost:5173',
@@ -55,16 +55,16 @@ cloudinary.config({
             'https://sportgood.onrender.com',
         ];
 
-        // Cho phép request không có origin (VD: Postman, mobile apps)
+        // Cho phép yêu cầu không có origin (ví dụ: Postman, ứng dụng di động)
         if (!origin) {
             return callback(null, true);
         }
 
-        // Kiểm tra origin có trong danh sách cho phép không
+        // Kiểm tra origin có trong danh sách được phép không
         if (allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
-            // Log origin bị từ chối để debug
+            // Log origin bị chặn để debug
             console.log('CORS blocked origin:', origin);
             callback(new Error('Not allowed by CORS'));
         }
@@ -74,7 +74,7 @@ cloudinary.config({
     allowedHeaders: ['Content-Type', 'auth-token', 'Authorization', 'origin', 'Accept']
 };
 
-// Middleware CORS - Xử lý tất cả requests từ frontend Vercel
+// Middleware CORS - Xử lý tất cả yêu cầu từ frontend Vercel
 app.use((req, res, next) => {
     const allowedOrigins = [
         'http://localhost:3000',
@@ -91,7 +91,7 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, auth-token, Authorization, origin, Accept');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     
-    // Xử lý preflight OPTIONS request ngay tại đây
+    // Xử lý yêu cầu OPTIONS preflight
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
@@ -99,14 +99,14 @@ app.use((req, res, next) => {
     next();
 });
 
-        // Kết nối MongoDB được gọi trong startServer() (cuối file) để Render có PORT + MONGODB_URI đúng.
+        // Kết nối MongoDB được gọi trong startServer() (ở dưới) để Render có PORT + MONGODB_URI sẵn sàng.
 
-        //API create
+        //API tạo
         app.get("/",(req, res) => {
             res.send("Express App is Running")
         })
 
-        //Image Storage Engine - Sử dụng Cloudinary thay vì lưu trên local
+        //Lưu trữ hình ảnh - Sử dụng Cloudinary thay vì lưu trữ cục bộ
         let storage;
         try {
             storage = new CloudinaryStorage({
@@ -126,13 +126,13 @@ app.use((req, res, next) => {
         // Middleware upload - kiểm tra storage có tồn tại không
         const upload = storage
             ? multer({ storage: storage })
-            : multer({ dest: './upload/images' }); // Fallback to local storage
+            : multer({ dest: './upload/images' }); // Dự phòng lưu trữ cục bộ
 
         if (!storage) {
             console.warn('WARNING: Cloudinary not configured. Using local storage fallback.');
         }
 
-        //Creating Upload Endpoint for Images
+        //Tạo endpoint upload cho hình ảnh
         app.use('/images',express.static('upload/images'))
         app.post("/upload", upload.single('product'),(req,res) => {
             res.json({
@@ -141,7 +141,7 @@ app.use((req, res, next) => {
             })
         })
 
-        //schema for Creating Products
+        //Schema tạo sản phẩm
         const Product = mongoose.model("Product",{
             id:{
                 type: Number,
@@ -217,16 +217,16 @@ app.use((req, res, next) => {
                 let products = await Product.find({});
                 let id = products.length > 0 ? products[products.length - 1].id + 1 : 1;
         
-                // Kiểm tra files có tồn tại không
+                // Kiểm tra file có tồn tại không
                 if (!req.files || req.files.length === 0) {
                     console.error('No files uploaded');
                     return res.status(400).json({
                         success: false,
-                        error: 'Vui lòng tải lên ít nhất 1 hình ảnh'
+                        error: 'Please upload at least 1 image'
                     });
                 }
         
-                // Sử dụng URL từ Cloudinary thay vì localhost
+                // Sử dụng URL Cloudinary thay vì localhost
                 const mainImage = req.files[0] ? req.files[0].path : '';
                 const additionalImages = req.files.slice(1).map(file => file.path);
         
@@ -297,30 +297,30 @@ app.use((req, res, next) => {
                 description: req.body.description,
             };
         
-            // Xử lý ảnh chính
+        //Xử lý hình ảnh chính
             if (req.files['image'] && req.files['image'][0]) {
                 updatedData.image = req.files['image'][0].path;
             }
         
-            // Xử lý ảnh phụ
+            // Xử lý hình ảnh bổ sung
             if (req.files['additionalImages']) {
                 updatedData.additionalImages = req.files['additionalImages'].map(file => file.path);
             }
         
             const updatedProduct = await Product.findOneAndUpdate({ id: productId }, updatedData, { new: true });
-        
+
             if (!updatedProduct) {
-                return res.status(404).json({ success: false, error: 'Không tìm thấy sản phẩm' });
+                return res.status(404).json({ success: false, error: 'Product not found' });
             }
-        
+
             res.json({ success: true, product: updatedProduct });
             } catch (error) {
-            console.error('Lỗi khi cập nhật sản phẩm:', error);
-            res.status(500).json({ success: false, error: 'Đã xảy ra lỗi khi cập nhật sản phẩm' });
+            console.error('Error updating product:', error);
+            res.status(500).json({ success: false, error: 'An error occurred while updating the product' });
             }
         });
 
-        //Creating API For deleting products
+        //Tạo API để xóa sản phẩm
         app.post('/removeproduct',async(req,res)=>{
             await Product.findOneAndDelete({id:req.body.id});
             console.log("Removed");
@@ -331,7 +331,7 @@ app.use((req, res, next) => {
             })
         })
 
-        //Creating API for getting all products
+        //Tạo API để lấy tất cả sản phẩm
         app.get('/allproducts', async (req, res) => {
             try {
             let products = await Product.find({});
@@ -345,10 +345,10 @@ app.use((req, res, next) => {
             console.log("All Product Fetched");
             res.send(transformed);
             } catch (error) {
-            console.error('Lỗi khi lấy danh sách sản phẩm:', error);
+            console.error('Error fetching products:', error);
             res.status(500).json({
                 success: false,
-                error: 'Đã xảy ra lỗi khi lấy danh sách sản phẩm. Vui lòng thử lại sau.'
+                error: 'An error occurred while fetching products. Please try again later.'
             });
             }
         });
@@ -356,7 +356,8 @@ app.use((req, res, next) => {
         app.get('/products/:category', async (req, res) => {
             const category = req.params.category;
             try {
-            // Thực hiện truy vấn cơ sở dữ liệu để lấy sản phẩm theo category
+            // Truy vấn database để lấy sản phẩm theo danh mục
+
             const products = await Product.find({ category }); 
             res.json(products);
             } catch (error) {
@@ -377,8 +378,8 @@ const DetailedCategory = mongoose.model("DetailedCategory", {
         required: true,
         enum: ['Men', 'Women', 'Sports Equipment'],
     },
-    sizes: {
-        type: [String], // Lưu danh sách các size tương ứng
+            sizes: {
+        type: [String], // Lưu danh sách kích thước cho mỗi danh mục
         default: [],
     },
 });
@@ -391,18 +392,19 @@ app.post("/addDetailedCategory", async (req, res) => {
         const { generalCategory, name, type } = req.body; 
         let sizes = [];
 
-        // Xác định size mặc định dựa trên loại danh mục
+        //Xác định kích thước mặc định dựa trên loại danh mục
         if (type === "Clothes") {
             sizes = ['S', 'M', 'L', 'XL', 'XXL'];
         } else if (type === "Shoes") {
             sizes = ['38', '39', '40', '41', '42', '43'];
         } 
-        // Nếu là Sport Equiment thì sizes sẽ là mảng rỗng (đã được set mặc định trong schema)
+        // Nếu Sports Equipment - sizes sẽ rỗng (đã đặt là mặc định trong schema)
 
         const newDetailedCategory = new DetailedCategory({
             generalCategory,
             name,
-            sizes, // Lưu size vào database
+                    sizes, // Lưu sizes vào database
+
         });
 
         await newDetailedCategory.save();
@@ -437,7 +439,7 @@ app.delete('/deleteDetailedCategory/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        // First, find the detailed category to get its name
+        // Trước tiên, tìm danh mục chi tiết để lấy tên
         const detailedCategory = await DetailedCategory.findById(id);
         
         if (!detailedCategory) {
@@ -486,12 +488,14 @@ app.get('/checkProductsInCategory/:id', async (req, res) => {
         let detailedCategory;
 
         // Nếu là danh mục mặc định
+
         if (id.startsWith('default')) {
-            // Tách thông tin từ id của danh mục mặc định
+            // Split info from default category id
             const [, generalCategory, name] = id.split('-'); 
             detailedCategory = { name, generalCategory };
         } else {
-            // Nếu là danh mục từ database
+            // If database category
+
             detailedCategory = await DetailedCategory.findById(id);
             if (!detailedCategory) {
                 return res.status(404).json({ 
@@ -501,7 +505,8 @@ app.get('/checkProductsInCategory/:id', async (req, res) => {
             }
         }
 
-        // Kiểm tra sản phẩm (sử dụng detailedCategory.name và detailedCategory.generalCategory)
+        // Check product using detailedCategory.name and detailedCategory.generalCategory
+
         const existingProducts = await Product.find({ 
             detailedCategory: detailedCategory.name,
             generalCategory: detailedCategory.generalCategory
@@ -601,7 +606,11 @@ app.get('/getProductsByCategory', async (req, res) => {
                     type: Date,
                     default: Date.now
                 }
-            }]
+            }],
+            passwordChangedAt: {
+                type: Date,
+                default: null
+            }
         });
         const Users = mongoose.model('Users', userSchema);
         
@@ -616,7 +625,7 @@ app.get('/getProductsByCategory', async (req, res) => {
                     name: 'Admin',
                     email: adminEmail,
                     password: adminPassword,
-                    role: 'admin' // Vai trò là 'admin'
+                    role: 'admin' // Role is 'admin'
                 });
                 await adminUser.save();
                 console.log('Admin account created');
@@ -629,7 +638,7 @@ app.get('/getProductsByCategory', async (req, res) => {
         //Creating Endpoint for register the user
         app.post('/signup', async (req, res) => {
             try {
-                // Kiểm tra xem email đã tồn tại chưa
+                // Kiểm tra email đã tồn tại chưa
                 let check = await Users.findOne({email: req.body.email});
                 if (check) {
                     return res.status(400).json({
@@ -638,22 +647,22 @@ app.get('/getProductsByCategory', async (req, res) => {
                     });
                 }
         
-                // Tạo user mới
+                // Create new user
                 const user = new Users({
                     name: req.body.username,
-                    email: req.body.email, 
-                    password: req.body.password, // Lưu ý: Nên hash password
-                    cartData: [], // Khởi tạo cartData là mảng rỗng
+                    email: req.body.email,
+                    password: req.body.password, // Note: Password should be hashed
+                    cartData: [], // Initialize cartData as empty array
                     role: 'user'
                 });
         
-                // Lưu user
+                // Save user
                 await user.save();
         
-                // Log thông tin user để kiểm tra
+                // Log user info for verification
                 console.log('User saved successfully:', user);
         
-                // Tạo token
+                // Create token
                 const data = {
                     user: {
                         id: user._id, 
@@ -663,7 +672,7 @@ app.get('/getProductsByCategory', async (req, res) => {
                 
                 const token = jwt.sign(data, 'secret_ecom');
         
-                // Trả về response
+                // Return response
                 res.json({
                     success: true,
                     token,
@@ -697,7 +706,8 @@ app.get('/getProductsByCategory', async (req, res) => {
                 }
                 const data = {
                     user: {
-                        id: user.id, // Đảm bảo user.id được gửi trong response
+                        id: user.id, // Ensure user.id is sent in response
+
                         role: user.role
                     },
                     cartData: user.cartData
@@ -720,52 +730,52 @@ app.get('/getProductsByCategory', async (req, res) => {
         app.post('/forgot-password', async (req, res) => {
             try {
                 const { email } = req.body;
-        
-                // Kiểm tra xem email có tồn tại không
+
+                if (!email) {
+                    return res.status(400).json({ success: false, error: "Email is required" });
+                }
+
                 const user = await Users.findOne({ email });
                 if (!user) {
                     return res.status(404).json({ success: false, error: "Account does not exist" });
                 }
-        
-                // Tạo mã OTP ngẫu nhiên
-                const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6 chữ số
-        
-                // Lưu OTP và thời gian hết hạn vào user (sử dụng thêm trường otp và otpExpiration)
+
+                const otp = Math.floor(100000 + Math.random() * 900000).toString();
                 user.otp = otp;
-                user.otpExpiration = Date.now() + 5 * 60 * 1000; // Hết hạn sau 5 phút
+                user.otpExpiration = Date.now() + 5 * 60 * 1000;
                 await user.save();
 
-                console.log("OTP generated:", otp); // In ra mã OTP đã tạo
-                console.log("OTP expiration:", user.otpExpiration); 
-        
-                // Gửi email chứa OTP (sử dụng Nodemailer)
-                const transporter = nodemailer.createTransport({
-                    // Cấu hình dịch vụ email của bạn (Gmail, SendGrid, Mailgun, etc.)
-                    service: 'gmail', 
-                    auth: {
-                        user: 'phamthehuy18052002@gmail.com', 
-                        pass: 'nheq uxug pxii rfjn'
-                    }
-                });
-        
-                const mailOptions = {
-                    from: 'phamthehuy18052002@gmail.com',
-                    to: email,
-                    subject: 'Sportstores Password Reset OTP',
-                    text: `Your OTP for password reset is: ${otp}`
-                };
-        
-                await transporter.sendMail(mailOptions);
-        
-                res.json({ success: true   
-         });
+                console.log("OTP generated:", otp);
+
+                try {
+                    const transporter = nodemailer.createTransport({
+                        service: 'gmail',
+                        auth: {
+                            user: 'phamthehuy18052002@gmail.com',
+                            pass: 'nheq uxug pxii rfjn'
+                        },
+                        timeout: 10000
+                    });
+
+                    await transporter.sendMail({
+                        from: 'phamthehuy18052002@gmail.com',
+                        to: email,
+                        subject: 'Sportstores Password Reset OTP',
+                        text: `Your OTP for password reset is: ${otp}`
+                    });
+                    console.log("Email sent successfully");
+                } catch (emailError) {
+                    console.error("Email send failed (OTP still saved):", emailError.message);
+                }
+
+                res.json({ success: true, message: "OTP sent to your email" });
             } catch (error) {
                 console.error('Error in forgot-password:', error);
                 res.status(500).json({ success: false, error: "Internal server error" });
             }
         });
         
-        // API kiểm tra mã OTP
+        // API to verify OTP code
         app.post('/verify-otp', async (req, res) => {
             try {
                 const { email, otp } = req.body;
@@ -774,21 +784,21 @@ app.get('/getProductsByCategory', async (req, res) => {
                 if (!user) {
                     return res.status(404).json({ success: false, error: "Account does not exist" });
                 }
-                console.log("OTP from database:", user.otp); // In ra OTP từ database
-        console.log("OTP from request:", otp); // In ra OTP từ request
-        console.log("Current time:", Date.now()); // In ra thời gian hiện tại
+                console.log("OTP from database:", user.otp);
+        console.log("OTP from request:", otp);
+        console.log("Current time:", Date.now());
         console.log("OTP expiration time:", user.otpExpiration);
-        
-                // Kiểm tra OTP
+
+                // Verify OTP
                 if (user.otp !== otp) {
                     return res.status(400).json({ success: false, error: "Incorrect verification code" });
                 }
         
-                // Kiểm tra thời hạn OTP
+                // Verify OTP expiration
                 if (Date.now() > user.otpExpiration) {
                     return res.status(400).json({ success: false, error: "The verification code has expired." });
                 }
-        
+
                 res.json({ success: true });
                 
             } catch (error) {
@@ -797,7 +807,7 @@ app.get('/getProductsByCategory', async (req, res) => {
             }
         });
         
-        // API cập nhật mật khẩu
+        // API to update password
         app.post('/update-password', async (req, res) => {
             try {
                 const { email, password } = req.body;
@@ -807,8 +817,9 @@ app.get('/getProductsByCategory', async (req, res) => {
                     return res.status(404).json({ success: false, error: "Account does not exist" });
                 }
 
-                // Cập nhật mật khẩu (nên hash password trước khi lưu)
+                // Update password and set passwordChangedAt
                 user.password = password;
+                user.passwordChangedAt = new Date();
                 await user.save();
 
                 res.json({ success: true });
@@ -822,16 +833,16 @@ app.get('/getProductsByCategory', async (req, res) => {
         app.get('/newcollections', async (req,res)=>{
             try {
                 let newcollection = await Product.find({})
-                    .sort({ date: -1 }) // Sắp xếp theo date giảm dần (mới nhất trước)
-                    .limit(4); // Giới hạn 4 sản phẩm
+                    .sort({ date: -1 }) // Sort by date descending (newest first)
+                    .limit(4); // Limit to 4 products
         
                 console.log("New Collection Fetched");
                 res.send(newcollection);
             } catch (error) {
-                console.error('Lỗi khi lấy danh sách sản phẩm mới:', error);
-                res.status(500).json({ 
-                    success: false, 
-                    error: 'Đã xảy ra lỗi khi lấy danh sách sản phẩm mới. Vui lòng thử lại sau.' 
+                console.error('Error fetching new products:', error);
+                res.status(500).json({
+                    success: false,
+                    error: 'An error occurred while fetching new products. Please try again later.'
                 });
             }
         });
@@ -846,10 +857,10 @@ app.get('/getProductsByCategory', async (req, res) => {
                 console.log("Popular in women fetch");
                 res.send(popular_in_women);
             } catch (error) {
-                console.error('Lỗi khi lấy danh sách sản phẩm phổ biến cho nữ:', error);
+                console.error('Error fetching popular products for women:', error);
                 res.status(500).json({
                     success: false,
-                    error: 'Đã xảy ra lỗi khi lấy danh sách sản phẩm phổ biến cho nữ. Vui lòng thử lại sau.'
+                    error: 'An error occurred while fetching popular products for women. Please try again later.'
                 });
             }
         });
@@ -858,7 +869,8 @@ app.get('/getProductsByCategory', async (req, res) => {
 app.get('/product/:productName', async (req, res) => {
     try {
         const productName = req.params.productName;
-        // Tìm kiếm sản phẩm dựa trên productName (hoặc slug)
+        // Search for products based on productName (or slug)
+
         const product = await Product.findOne({ name: productName }); 
         if (!product) {
             return res.status(404).json({ error: 'Product not found' });
@@ -870,7 +882,7 @@ app.get('/product/:productName', async (req, res) => {
     }
 });
 
-        //creating middelware to fetch user
+        //Tạo middleware để lấy thông tin người dùng
         const fetchUser = async (req, res, next)=>{
             const token = req.header('auth-token');
             if(!token){
@@ -887,7 +899,8 @@ app.get('/product/:productName', async (req, res) => {
             }
         }
 
-        // API lấy thông tin profile người dùng
+        // API để lấy thông tin người dùng
+
         app.get('/get-profile', fetchUser, async (req, res) => {
             try {
                 const user = await Users.findById(req.user.id).select('-cartData -otp -otpExpiration');
@@ -901,7 +914,8 @@ app.get('/product/:productName', async (req, res) => {
                         name: user.name,
                         email: user.email,
                         phone: user.phone || '',
-                        addresses: user.addresses || []
+                        addresses: user.addresses || [],
+                        passwordChangedAt: user.passwordChangedAt || null
                     }
                 });
             } catch (error) {
@@ -910,7 +924,8 @@ app.get('/product/:productName', async (req, res) => {
             }
         });
 
-        // API cập nhật thông tin profile
+        // API để cập nhật thông tin người dùng
+
         app.put('/update-profile', fetchUser, async (req, res) => {
             try {
                 const { name, phone } = req.body;
@@ -940,7 +955,8 @@ app.get('/product/:productName', async (req, res) => {
             }
         });
 
-        // API thêm địa chỉ mới
+        // API để thêm địa chỉ mới
+
         app.post('/add-address', fetchUser, async (req, res) => {
             try {
                 const { label, fullName, phone, addressLine, city, province, postalCode, isDefault } = req.body;
@@ -974,7 +990,8 @@ app.get('/product/:productName', async (req, res) => {
             }
         });
 
-        // API cập nhật địa chỉ
+        // API để cập nhật địa chỉ
+
         app.put('/update-address/:addressId', fetchUser, async (req, res) => {
             try {
                 const { addressId } = req.params;
@@ -1017,7 +1034,7 @@ app.get('/product/:productName', async (req, res) => {
             }
         });
 
-        // API xóa địa chỉ
+        // API để xóa địa chỉ
         app.delete('/delete-address/:addressId', fetchUser, async (req, res) => {
             try {
                 const { addressId } = req.params;
@@ -1051,7 +1068,7 @@ app.get('/product/:productName', async (req, res) => {
             }
         });
 
-        // API đặt địa chỉ mặc định
+        // API để đặt địa chỉ mặc định
         app.put('/set-default-address/:addressId', fetchUser, async (req, res) => {
             try {
                 const { addressId } = req.params;
@@ -1121,7 +1138,7 @@ app.get('/product/:productName', async (req, res) => {
                     return res.status(404).json({ error: 'User not found' });
                 }
         
-                // Chuyển đổi cartData sang định dạng phù hợp
+                // Convert cartData to appropriate format
                 const cartData = {};
                 userData.cartData.forEach(item => {
                     if (!cartData[item.productId]) {
@@ -1170,71 +1187,71 @@ app.put('/updatecart', fetchUser, async (req, res) => {
 
 
             app.get('/admin/get-users', fetchUser, async (req, res) => {
-                // Kiểm tra xem người dùng có phải là admin không
+                // Kiểm tra người dùng có phải là admin không
                 if (req.user.role !== 'admin') {
-                    return res.status(403).json({ error: 'Forbidden' }); 
+                    return res.status(403).json({ error: 'Forbidden' });
                 }
-            
+
                 try {
-                    const users = await Users.find({ role: { $in: ['user', 'staff'] } }); 
+                    const users = await Users.find({ role: { $in: ['user', 'staff'] } });
                     res.json(users);
                 } catch (error) {
-                    console.error('Lỗi khi lấy danh sách tài khoản:', error);
-                    res.status(500).json({ success: false, error: 'Đã xảy ra lỗi khi lấy danh sách tài khoản.' });
+                    console.error('Error fetching account list:', error);
+                    res.status(500).json({ success: false, error: 'An error occurred while fetching the account list.' });
                 }
             });
 
 
             app.delete('/admin/delete-account/:userId', fetchUser, async (req, res) => {
-                // Kiểm tra xem người dùng có phải là admin không
+                // Kiểm tra người dùng có phải là admin không
                 if (req.user.role !== 'admin') {
-                    return res.status(403).json({ error: 'Forbidden' }); 
+                    return res.status(403).json({ error: 'Forbidden' });
                 }
-            
+
                 try {
                     const userId = req.params.userId;
                     const deletedUser = await Users.findByIdAndDelete(userId);
-            
+
                     if (!deletedUser) {
-                        return res.status(404).json({ error: 'Không tìm thấy tài khoản' });
+                        return res.status(404).json({ error: 'Account not found' });
                     }
-            
+
                     res.json({ success: true });
                 } catch (error) {
-                    console.error('Lỗi khi xóa tài khoản:', error);
-                    res.status(500).json({ success: false, error: 'Đã xảy ra lỗi khi xóa tài khoản.' });
+                    console.error('Error deleting account:', error);
+                    res.status(500).json({ success: false, error: 'An error occurred while deleting the account.' });
                 }
             });
 
             app.put('/admin/update-account/:userId', fetchUser, async (req, res) => {
-                // Kiểm tra xem người dùng có phải là admin không
+                // Kiểm tra người dùng có phải là admin không
                 if (req.user.role !== 'admin') {
-                    return res.status(403).json({ error: 'Forbidden' }); 
+                    return res.status(403).json({ error: 'Forbidden' });
                 }
-            
+
                 try {
                     const userId = req.params.userId;
-                    const { name, email, password, role } = req.body; // Lấy thông tin cập nhật từ req.body
-            
+                    const { name, email, password, role } = req.body;
+
                     const updatedUser = await Users.findByIdAndUpdate(
-                        userId, 
-                        { name, email, password, role }, 
+                        userId,
+                        { name, email, password, role },
                         { new: true }
                     );
-            
+
                     if (!updatedUser) {
-                        return res.status(404).json({ error: 'Không tìm thấy tài khoản' });
+                        return res.status(404).json({ error: 'Account not found' });
                     }
-            
+
                     res.json({ success: true, user: updatedUser });
                 } catch (error) {
-                    console.error('Lỗi khi cập nhật tài khoản:', error);
-                    res.status(500).json({ success: false, error: 'Đã xảy ra lỗi khi cập nhật tài khoản.' });
+                    console.error('Error updating account:', error);
+                    res.status(500).json({ success: false, error: 'An error occurred while updating the account.' });
                 }
             });
 
             
-        //creating endpoint to remove produt from cartdata
+        //creating endpoint để xóa sản phẩm khỏi cartdata
         app.post('/removefromcart', fetchUser, async (req, res) => {
             try {
                 const { itemId, selectedSize } = req.body;
@@ -1249,7 +1266,7 @@ app.put('/updatecart', fetchUser, async (req, res) => {
                     if (cartItem.quantity > 1) {
                         cartItem.quantity -= 1;
                     } else {
-                        // Nếu số lượng là 1, loại bỏ sản phẩm khỏi giỏ hàng
+                        // Nếu số lượng là 1, xóa sản phẩm khỏi giỏ hàng
                         userData.cartData = userData.cartData.filter(
                             item => !(item.productId === itemId && item.size === selectedSize)
                         );
@@ -1270,10 +1287,10 @@ app.put('/updatecart', fetchUser, async (req, res) => {
         });
 
 
-        //Endpoin clearcart
+        //Endpoint xóa giỏ hàng
         app.post('/clearcart', fetchUser, async (req, res) => {
             try {
-                // Use findOneAndUpdate to avoid versioning conflicts
+                // Sử dụng findOneAndUpdate để tránh xung đột versioning
                 const user = await Users.findOneAndUpdate(
                     { _id: req.user.id },
                     { $set: { cartData: [] } },
@@ -1296,7 +1313,7 @@ app.put('/updatecart', fetchUser, async (req, res) => {
         });
 
 
-    // Schema cho đơn hàng
+    // Schema đơn hàng
     const Order = mongoose.model("Order", {
         userId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -1325,6 +1342,14 @@ app.put('/updatecart', fetchUser, async (req, res) => {
             type: Number,
             required: true
         },
+        subtotal: {
+            type: Number,
+            default: 0
+        },
+        shippingCost: {
+            type: Number,
+            default: 0
+        },
         shippingInfo: {
             name: { type: String, required: true },
             address: { type: String, required: true },
@@ -1349,7 +1374,7 @@ app.put('/updatecart', fetchUser, async (req, res) => {
     });
 
 
-// Endpoint xử lý thanh toán
+// Endpoint thanh toán
 app.post('/checkout', fetchUser, async (req, res) => {
     const session = await mongoose.startSession(); 
     session.startTransaction();
@@ -1361,13 +1386,13 @@ app.post('/checkout', fetchUser, async (req, res) => {
         const orderProducts = await Promise.all(products.map(async product => {
             // Thay đổi tìm kiếm sản phẩm
             const productData = await Product.findOne({ id: product.productId }).lean();
-            
+
             // Kiểm tra productData trước khi sử dụng
             if (!productData) {
                 throw new Error(`Product with ID ${product.productId} not found`);
             }
 
-            // Kiểm tra stock trước khi checkout
+            // Kiểm tra tồn kho trước khi thanh toán
             if (productData.generalCategory === 'Sports Equipment') {
                 if (productData.stock < product.quantity) {
                     throw new Error(`Insufficient stock for Sports Equipment: ${productData.name}`);
@@ -1380,14 +1405,19 @@ app.post('/checkout', fetchUser, async (req, res) => {
                 quantity: product.quantity,
                 price: productData.new_price,
                 size: product.size,
-                name: productData.name  // Thêm tên sản phẩm để dễ debug
+                name: productData.name  // Thêm tên sản phẩm để debug dễ hơn
             };
         }));
+
+        const shippingCost = totalAmount >= 100 ? 0 : 15;
+        const grandTotal = totalAmount + shippingCost;
 
         const newOrder = new Order({
             userId: req.user.id,
             products: orderProducts,
-            totalAmount,
+            totalAmount: grandTotal,
+            subtotal: totalAmount,
+            shippingCost,
             shippingInfo,
             paymentMethod,
             orderStatus: 'pending'
@@ -1400,14 +1430,14 @@ app.post('/checkout', fetchUser, async (req, res) => {
         for (let product of orderProducts) {
             let updatedProduct;
             
-            // Giảm stock (sử dụng transaction)
+            // Giảm tồn kho (sử dụng transaction)
             updatedProduct = await Product.findOneAndUpdate(
                 { id: product.productId },
                 { $inc: { stock: -product.quantity } },
                 { new: true, session }
             );
 
-            // Tự động cập nhật sizeStatus nếu sản phẩm có size
+            // Tự động cập nhật sizeStatus nếu sản phẩm có kích thước
             if (product.size && product.size !== 'default' && updatedProduct.sizeStatus instanceof Map) {
                 const ss = updatedProduct.sizeStatus.get(product.size);
                 if (ss && ss.remainingQuantity !== null) {
@@ -1422,7 +1452,7 @@ app.post('/checkout', fetchUser, async (req, res) => {
                 }
             }
 
-            // Kiểm tra updatedProduct trước khi push
+            // Kiểm tra updatedProduct trước khi thêm vào
             if (!updatedProduct) {
                 throw new Error(`Failed to update product: ${product.name}`);
             }
@@ -1436,29 +1466,29 @@ app.post('/checkout', fetchUser, async (req, res) => {
             });
         }
 
-        // Commit transaction
+        // Cam kết transaction
         await session.commitTransaction();
         session.endSession();
 
-        // Emit Socket.IO event với thông tin sản phẩm đã cập nhật
+        // Gửi sự kiện Socket.IO với thông tin sản phẩm đã cập nhật
         io.emit('stockUpdated', updatedProducts);
 
-        res.json({ 
-            success: true, 
+        res.json({
+            success: true,
             orderId: savedOrder._id,
             updatedProducts: updatedProducts
         });
 
     } catch (error) {
-        // Nếu có lỗi, rollback transaction
+        // Khi có lỗi, rollback transaction
         await session.abortTransaction();
         session.endSession();
 
-        console.error('Chi tiết lỗi:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message || 'Đã xảy ra lỗi khi thanh toán. Vui lòng thử lại sau.',
-            errorDetails: error.toString()  // Thêm chi tiết lỗi để debug
+        console.error('Error details:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'An error occurred during checkout. Please try again later.',
+            errorDetails: error.toString()
         });
     }
 });
@@ -1466,10 +1496,10 @@ app.post('/checkout', fetchUser, async (req, res) => {
 
 
 // ============================================================
-// WISHLIST API
+// API DANH SÁCH YÊU THÍCH
 // ============================================================
 
-// Thêm sản phẩm vào wishlist
+// Thêm sản phẩm vào danh sách yêu thích
 app.post('/wishlist/add', fetchUser, async (req, res) => {
     try {
         const { productId } = req.body;
@@ -1482,7 +1512,7 @@ app.post('/wishlist/add', fetchUser, async (req, res) => {
             return res.status(404).json({ success: false, error: 'User not found' });
         }
 
-        // Kiểm tra sản phẩm đã có trong wishlist chưa
+        // Kiểm tra sản phẩm đã có trong danh sách yêu thích chưa
         const exists = user.wishlist.some(item => item.productId === Number(productId));
         if (exists) {
             return res.status(400).json({ success: false, error: 'Product already in wishlist' });
@@ -1498,7 +1528,7 @@ app.post('/wishlist/add', fetchUser, async (req, res) => {
     }
 });
 
-// Xóa sản phẩm khỏi wishlist
+// Xóa sản phẩm khỏi danh sách yêu thích
 app.post('/wishlist/remove', fetchUser, async (req, res) => {
     try {
         const { productId } = req.body;
@@ -1521,7 +1551,7 @@ app.post('/wishlist/remove', fetchUser, async (req, res) => {
     }
 });
 
-// Lấy danh sách wishlist (chỉ trả về productId)
+// Lấy danh sách yêu thích (chỉ trả về productId)
 app.get('/wishlist', fetchUser, async (req, res) => {
     try {
         const user = await Users.findById(req.user.id);
@@ -1536,7 +1566,7 @@ app.get('/wishlist', fetchUser, async (req, res) => {
     }
 });
 
-// Lấy danh sách wishlist kèm thông tin sản phẩm đầy đủ
+// Lấy danh sách yêu thích kèm thông tin sản phẩm đầy đủ
 app.get('/wishlist/full', fetchUser, async (req, res) => {
     try {
         const user = await Users.findById(req.user.id);
@@ -1547,7 +1577,7 @@ app.get('/wishlist/full', fetchUser, async (req, res) => {
         const productIds = user.wishlist.map(item => item.productId);
         const products = await Product.find({ id: { $in: productIds } });
 
-        // Sắp xếp theo thứ tự trong wishlist
+// Sắp xếp theo thứ tự trong danh sách yêu thích
         const productMap = Object.fromEntries(products.map(p => [p.id, p]));
         const wishlistProducts = user.wishlist
             .map(item => productMap[item.productId])
@@ -1560,7 +1590,7 @@ app.get('/wishlist/full', fetchUser, async (req, res) => {
     }
 });
 
-// Kiểm tra sản phẩm có trong wishlist không
+// Kiểm tra sản phẩm có trong danh sách yêu thích không
 app.get('/wishlist/check/:productId', fetchUser, async (req, res) => {
     try {
         const { productId } = req.params;
@@ -1577,7 +1607,7 @@ app.get('/wishlist/check/:productId', fetchUser, async (req, res) => {
     }
 });
 
-// Xóa toàn bộ wishlist
+// Xóa toàn bộ danh sách yêu thích
 app.delete('/wishlist/clear', fetchUser, async (req, res) => {
     try {
         const user = await Users.findById(req.user.id);
@@ -1598,10 +1628,10 @@ app.delete('/wishlist/clear', fetchUser, async (req, res) => {
 
 
 // ============================================================
-// ENDPOINTS: ORDER HISTORY / GET-ORDERS (existing)
+// ENDPOINTS: LỊCH SỬ ĐƠN HÀNG / GET-ORDERS (hiện có)
 // ============================================================
 
-    // Endpoint lấy danh sách đơn hàng của người dùng
+    // Endpoint để lấy đơn hàng của người dùng
     app.get('/get-orders', fetchUser, async (req, res) => {
         try {
             const orders = await Order.find({ userId: req.user.id });
@@ -1612,7 +1642,7 @@ app.delete('/wishlist/clear', fetchUser, async (req, res) => {
         }
     });
 
-    // Endpoint lấy danh sách tất cả đơn hàng (chỉ dành cho staff)
+    // Endpoint để lấy tất cả đơn hàng (chỉ nhân viên)
     app.get('/staff/get-all-orders', fetchUser, async (req, res) => {
         console.log('User role:', req.user.role);
         if (req.user.role !== 'staff') {
@@ -1630,16 +1660,16 @@ app.delete('/wishlist/clear', fetchUser, async (req, res) => {
         }
     });
 
-    // Endpoint cập nhật trạng thái đơn hàng (chỉ dành cho staff)
+    // Endpoint để cập nhật trạng thái đơn hàng (chỉ nhân viên)
     app.put('/staff/update-order-status/:orderId', fetchUser, async (req, res) => {
-        // Kiểm tra xem người dùng có phải là admin không
+        // Check if user is staff
         if (req.user.role !== 'staff') {
-            return res.status(403).json({ error: 'Forbidden' }); 
+            return res.status(403).json({ error: 'Forbidden' });
         }
 
         try {
             const orderId = req.params.orderId;
-            const { newStatus } = req.body; 
+            const { newStatus } = req.body;
 
             // Lấy thông tin đơn hàng
             const order = await Order.findById(orderId);
@@ -1647,12 +1677,12 @@ app.delete('/wishlist/clear', fetchUser, async (req, res) => {
                 return res.status(404).json({ error: 'Order not found' });
             }
 
-            // Nếu trạng thái mới là "processing" hoặc "shipped" hoặc "delivered", cập nhật số lượng tồn kho
+            // Nếu trạng thái mới là "processing" hoặc "shipped" hoặc "delivered", cập nhật tồn kho
             if (newStatus === 'processing' || newStatus === 'shipped' || newStatus === 'delivered') {
                 order.products.forEach(async (product) => {
                     await Product.findOneAndUpdate(
-                        { id: product.productId }, 
-                        { $inc: { stock: -product.quantity } } // Giảm số lượng tồn kho
+                        { id: product.productId },
+                        { $inc: { stock: -product.quantity } } // Reduce inventory
                     );
                 });
             }
@@ -1668,17 +1698,17 @@ app.delete('/wishlist/clear', fetchUser, async (req, res) => {
         }
     });
 
-    // Endpoint tạo tài khoản mới (chỉ dành cho admin)
+    // Endpoint để tạo tài khoản mới (chỉ admin)
     app.post('/admin/create-account', fetchUser, async (req, res) => {
-        // Kiểm tra xem người dùng có phải là admin không
+        // Check if user is admin
         if (req.user.role !== 'admin') {
-            return res.status(403).json({ error: 'Forbidden' }); 
+            return res.status(403).json({ error: 'Forbidden' });
         }
-    
+
         try {
             const { name, email, password, role } = req.body;
-    
-            // Kiểm tra xem email đã tồn tại chưa
+
+            // Check if email already exists
             let check = await Users.findOne({ email });
             if (check) {
                 return res.status(400).json({ success: false, error: "Email already exists" });
@@ -1692,12 +1722,12 @@ app.delete('/wishlist/clear', fetchUser, async (req, res) => {
                 role 
             });
     
-            await newUser.save().catch(error => { 
-                console.error('Error saving user:', error); 
+            await newUser.save().catch(error => {
+                console.error('Error saving user:', error);
                 return res.status(500).json({ success: false, error: 'Error when creating an account' });
             });
-            console.log('User saved successfully'); // Log sau khi lưu
-    
+            console.log('User saved successfully');
+
             res.json({ success: true });
         } catch (error) {
             console.error('Error when creating an account:', error);
@@ -1706,14 +1736,14 @@ app.delete('/wishlist/clear', fetchUser, async (req, res) => {
     });
 
     app.get('/admin/get-orders', fetchUser, async (req, res) => {
-        // Kiểm tra xem người dùng có phải là nhân viên không
+        // Check if user is staff
         if (req.user.role !== 'admin') {
-            return res.status(403).json({ error: 'Forbidden' }); 
+            return res.status(403).json({ error: 'Forbidden' });
         }
 
         try {
-            // Lấy danh sách đơn hàng mà nhân viên có thể xem (tùy thuộc vào logic nghiệp vụ của bạn)
-            const orders = await Order.find({ /* ... điều kiện lọc đơn hàng ... */ }); 
+            // Get order list (customize filter conditions as needed)
+            const orders = await Order.find({ /* ... order filter conditions ... */ });
             res.json(orders);
         } catch (error) {
             console.error('Error fetching orders:', error);
@@ -1737,12 +1767,12 @@ app.delete('/wishlist/clear', fetchUser, async (req, res) => {
     });
 
 
-    // Endpoint cập nhật stock và sizeStatus (chỉ dành cho staff)
+    // Endpoint để cập nhật tồn kho và sizeStatus (chỉ nhân viên)
     app.put('/updatestock/:id', async (req, res) => {
             try {
                 const productId = req.params.id;
                 const { stock, sizeStatus } = req.body;
-                
+
                 const updateFields = {};
                 if (stock !== undefined) updateFields.stock = stock;
                 if (sizeStatus !== undefined) updateFields.sizeStatus = sizeStatus;
@@ -1754,7 +1784,7 @@ app.delete('/wishlist/clear', fetchUser, async (req, res) => {
                 );
 
                 if (!updatedProduct) {
-                    return res.status(404).json({ success: false, error: 'Không tìm thấy sản phẩm' });
+                    return res.status(404).json({ success: false, error: 'Product not found' });
                 }
 
                 const resp = updatedProduct.toObject();
@@ -1766,14 +1796,14 @@ app.delete('/wishlist/clear', fetchUser, async (req, res) => {
 
                 res.json({ success: true, product: resp });
             } catch (error) {
-                console.error('Lỗi khi cập nhật tồn kho:', error);
-                res.status(500).json({ success: false, error: 'Đã xảy ra lỗi khi cập nhật tồn kho' });
+                console.error('Error updating stock:', error);
+                res.status(500).json({ success: false, error: 'An error occurred while updating stock' });
             }
         });
 
 
 
-    // Schema cho Feedback (đã thêm trường isVisible để admin kiểm duyệt)
+    // Feedback schema (isVisible field added for admin moderation)
     const Feedback = mongoose.model("Feedback", {
         productId: {
             type: Number,
@@ -1800,14 +1830,14 @@ app.delete('/wishlist/clear', fetchUser, async (req, res) => {
             type: Date,
             default: Date.now
         },
-        isVisible: { type: Boolean, default: true }  // Admin ẩn review spam/inappropriate
+        isVisible: { type: Boolean, default: true }  // Admin can hide spam/inappropriate reviews
     });
 
-    // API thêm feedback mới
+    // API to add new feedback
     app.post('/add-feedback', fetchUser, async (req, res) => {
         try {
             const { productId, rating, content } = req.body;
-            const userName = await Users.findById(req.user.id).select('name'); // Lấy tên người dùng
+            const userName = await Users.findById(req.user.id).select('name'); // Get user name
 
             const newFeedback = new Feedback({
                 productId,
@@ -1815,35 +1845,35 @@ app.delete('/wishlist/clear', fetchUser, async (req, res) => {
                 userName: userName.name,
                 rating,
                 content,
-                isVisible: true  // Mới tạo mặc định hiển thị
+                isVisible: true  // New feedback is visible by default
             });
 
             await newFeedback.save();
-            res.status(201).json(newFeedback); // Trả về feedback mới được tạo
+            res.status(201).json(newFeedback); // Return newly created feedback
         } catch (error) {
-            console.error('Lỗi khi thêm feedback:', error);
-            res.status(500).json({ success: false, error: 'Đã xảy ra lỗi khi thêm feedback.' });
+            console.error('Error adding feedback:', error);
+            res.status(500).json({ success: false, error: 'An error occurred while adding feedback.' });
         }
     });
 
-    // API lấy danh sách feedback theo productId (chỉ hiển thị review đã được duyệt)
+    // API to get feedbacks by productId (only shows approved reviews)
     app.get('/get-feedbacks/:productId', async (req, res) => {
         try {
             const productId = req.params.productId;
             const feedbacks = await Feedback.find({ productId, isVisible: true }).sort({ date: -1 });
             res.json(feedbacks);
         } catch (error) {
-            console.error('Lỗi khi lấy danh sách feedback:', error);
-            res.status(500).json({ error: 'Đã xảy ra lỗi khi lấy danh sách feedback.' });
+            console.error('Error fetching feedbacks:', error);
+            res.status(500).json({ error: 'An error occurred while fetching feedbacks.' });
         }
     });
 
 
 // ============================================================
-// ADMIN: TỒN KHO THẤP & KIỂM DUYỆT REVIEW
+// ADMIN: LOW STOCK & REVIEW MODERATION
 // ============================================================
 
-// Lấy tất cả sản phẩm có tồn kho thấp (low_stock hoặc out_of_stock)
+// Get all products with low stock (low_stock or out_of_stock)
 const LOW_STOCK_THRESHOLD = parseInt(process.env.LOW_STOCK_THRESHOLD, 10) || 5;
 
 app.get('/api/admin/low-stock-alerts', fetchUser, async (req, res) => {
@@ -1856,7 +1886,7 @@ app.get('/api/admin/low-stock-alerts', fetchUser, async (req, res) => {
 
         const alerts = [];
         for (const p of products) {
-            // Kiểm tra sizeStatus (quần áo/giày)
+            // Check sizeStatus (clothes/shoes)
             if (p.sizeStatus && p.sizeStatus instanceof Map) {
                 const ss = p.sizeStatus.toObject();
                 for (const [size, info] of Object.entries(ss)) {
@@ -1876,7 +1906,7 @@ app.get('/api/admin/low-stock-alerts', fetchUser, async (req, res) => {
                 }
             }
 
-            // Kiểm tra stock tổng (dụng cụ thể thao)
+            // Check total stock (sports equipment)
             if (p.generalCategory === 'Sports Equipment' && typeof p.stock === 'number') {
                 if (p.stock <= LOW_STOCK_THRESHOLD) {
                     alerts.push({
@@ -1894,7 +1924,7 @@ app.get('/api/admin/low-stock-alerts', fetchUser, async (req, res) => {
             }
         }
 
-        // Sắp xếp: out_of_stock trước, rồi low_stock, theo số lượng tăng dần
+        // Sort: out_of_stock first, then low_stock, by quantity ascending
         alerts.sort((a, b) => {
             if (a.status === 'out_of_stock' && b.status !== 'out_of_stock') return -1;
             if (a.status !== 'out_of_stock' && b.status === 'out_of_stock') return 1;
@@ -1903,19 +1933,19 @@ app.get('/api/admin/low-stock-alerts', fetchUser, async (req, res) => {
 
         res.json({ alerts, total: alerts.length, threshold: LOW_STOCK_THRESHOLD });
     } catch (error) {
-        console.error('Lỗi khi lấy low-stock alerts:', error);
-        res.status(500).json({ error: 'Lỗi khi lấy danh sách tồn kho thấp.' });
+        console.error('Error fetching low-stock alerts:', error);
+        res.status(500).json({ error: 'An error occurred while fetching low-stock alerts.' });
     }
 });
 
-// Lấy tất cả reviews (admin) - kèm thông tin sản phẩm
+// Get all reviews (admin) - with product info
 app.get('/api/admin/reviews', fetchUser, async (req, res) => {
     try {
         if (req.user.role === 'user') {
             return res.status(403).json({ error: 'Forbidden' });
         }
 
-        const { visible } = req.query; // ?visible=true hoặc ?visible=false để lọc
+        const { visible } = req.query; // ?visible=true or ?visible=false for filter
 
         const filter = {};
         if (visible === 'true') filter.isVisible = true;
@@ -1925,7 +1955,7 @@ app.get('/api/admin/reviews', fetchUser, async (req, res) => {
             .sort({ date: -1 })
             .lean();
 
-        // Lookup product name cho từng review
+        // Lookup product name for each review
         const productIds = [...new Set(reviews.map(r => r.productId))];
         const products = await Product.find({ id: { $in: productIds } }, 'id name image').lean();
         const productMap = Object.fromEntries(products.map(p => [p.id, p]));
@@ -1938,12 +1968,12 @@ app.get('/api/admin/reviews', fetchUser, async (req, res) => {
 
         res.json(enriched);
     } catch (error) {
-        console.error('Lỗi khi lấy reviews (admin):', error);
-        res.status(500).json({ error: 'Lỗi khi lấy danh sách đánh giá.' });
+        console.error('Error fetching reviews (admin):', error);
+        res.status(500).json({ error: 'An error occurred while fetching the review list.' });
     }
 });
 
-// Toggle visible/ẩn một review
+// Toggle visible/hide a review
 app.put('/api/admin/reviews/:id/toggle-visibility', fetchUser, async (req, res) => {
     try {
         if (req.user.role === 'user') {
@@ -1951,19 +1981,19 @@ app.put('/api/admin/reviews/:id/toggle-visibility', fetchUser, async (req, res) 
         }
 
         const review = await Feedback.findById(req.params.id);
-        if (!review) return res.status(404).json({ error: 'Review không tồn tại.' });
+        if (!review) return res.status(404).json({ error: 'Review not found.' });
 
         review.isVisible = !review.isVisible;
         await review.save();
 
         res.json({ success: true, isVisible: review.isVisible, reviewId: review._id });
     } catch (error) {
-        console.error('Lỗi khi toggle visibility review:', error);
-        res.status(500).json({ error: 'Lỗi khi cập nhật trạng thái đánh giá.' });
+        console.error('Error toggling review visibility:', error);
+        res.status(500).json({ error: 'An error occurred while updating the review status.' });
     }
 });
 
-// Xóa một review (admin)
+// Delete a review (admin)
 app.delete('/api/admin/reviews/:id', fetchUser, async (req, res) => {
     try {
         if (req.user.role === 'user') {
@@ -1971,33 +2001,33 @@ app.delete('/api/admin/reviews/:id', fetchUser, async (req, res) => {
         }
 
         const deleted = await Feedback.findByIdAndDelete(req.params.id);
-        if (!deleted) return res.status(404).json({ error: 'Review không tồn tại.' });
+        if (!deleted) return res.status(404).json({ error: 'Review not found.' });
 
         res.json({ success: true, deletedId: req.params.id });
     } catch (error) {
-        console.error('Lỗi khi xóa review:', error);
-        res.status(500).json({ error: 'Lỗi khi xóa đánh giá.' });
+        console.error('Error deleting review:', error);
+        res.status(500).json({ error: 'An error occurred while deleting the review.' });
     }
 });
 
-// API endpoint để lấy danh sách nhân viên
+// API endpoint to get staff list
 app.get('/api/staff-list', fetchUser, async (req, res) => {
     try {
-        // Kiểm tra xem người dùng có phải là khách hàng không
+        // Check if user is a customer
         if (req.user.role !== 'user') {
             return res.status(403).json({ error: 'Forbidden' });
         }
 
-        // Lấy danh sách nhân viên từ database
-        const staffList = await Users.find({ 
+        // Get staff list from database
+        const staffList = await Users.find({
             role: 'staff',
-            // Có thể thêm các điều kiện khác như status: 'online' nếu cần
-        }, 'name _id'); // Chỉ lấy các trường cần thiết
+            // Can add other conditions like status: 'online' if needed
+        }, 'name _id'); // Only get necessary fields
 
         res.json(staffList);
     } catch (error) {
-        console.error('Lỗi khi lấy danh sách nhân viên:', error);
-        res.status(500).json({ error: 'Đã xảy ra lỗi khi lấy danh sách nhân viên.' });
+        console.error('Error fetching staff list:', error);
+        res.status(500).json({ error: 'An error occurred while fetching the staff list.' });
     }
 });
 
@@ -2031,7 +2061,7 @@ app.post('/submit-contact-form', async (req, res) => {
     try {
         const { name, email, subject, message, from } = req.body;
 
-        // Lưu dữ liệu vào database
+        // Save data to database
         const contactForm = new ContactForm({
             name,
             email,
@@ -2083,21 +2113,21 @@ app.post('/submit-contact-form', async (req, res) => {
 // ==========================================
 
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434/api/chat';
-// Llama 3.2 chỉ có 1B/3B trên Ollama — không có tag llama3.2:7b. Dùng llama3.1:8b làm mặc định (mạnh, gần ý "cách B").
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.1:8b';
+// Llama 3.2 only has 1B/3B on Ollama — no llama3.2:7b tag. Use llama3.1:8b as default (stronger).
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.2:1b';
 const OLLAMA_TEMPERATURE = parseFloat(process.env.OLLAMA_TEMPERATURE) || 0.7;
 
-// System prompt cho chatbot - tối ưu cho model 7B
+// System prompt for chatbot - optimized for 7B model
 const getSystemPrompt = (products, language = 'vi') => {
-    // Gom nhóm sản phẩm theo danh mục để AI dễ tìm kiếm
+    // Group products by category for easier AI search
     const byCategory = {};
     products.forEach(p => {
-        const cat = p.detailedCategory || 'Khác';
+        const cat = p.detailedCategory || 'Other';
         if (!byCategory[cat]) byCategory[cat] = [];
         byCategory[cat].push(p);
     });
 
-    const formatPrice = (n) => n ? n.toLocaleString('vi-VN') + 'đ' : 'N/A';
+    const formatPrice = (n) => n ? '$' + n.toFixed(2) : 'N/A';
 
     let productLines = [];
     Object.keys(byCategory).forEach(cat => {
@@ -2105,7 +2135,7 @@ const getSystemPrompt = (products, language = 'vi') => {
         byCategory[cat].forEach(p => {
             const sizes = Array.isArray(p.size) && p.size.length ? p.size.join(', ') : 'N/A';
             const desc = p.description ? ` - ${p.description.substring(0, 80)}` : '';
-            productLines.push(`  • ${p.name} | Giá: ${formatPrice(p.new_price)} (cũ: ${formatPrice(p.old_price)}) | Size: ${sizes}${desc}`);
+            productLines.push(`  • ${p.name} | Price: ${formatPrice(p.new_price)} (old: ${formatPrice(p.old_price)}) | Size: ${sizes}${desc}`);
         });
     });
 
@@ -2123,43 +2153,42 @@ PRODUCT CATALOG:\n${productContext}
 
 IMPORTANT RULES:
 1. If a product exists in the catalog above → answer confidently using real data (name, price, size, description)
-2. If a product does NOT exist in the catalog → say: "Xin lỗi, sản phẩm đó hiện không có trong cửa hàng. Bạn có thể thử tìm sản phẩm khác hoặc liên hệ hotline để được hỗ trợ."
+2. If a product does NOT exist in the catalog → say: "Sorry, that product is currently not available in our store. You can try searching for other products or contact our hotline for assistance."
 3. NEVER make up or invent product information that isn't in the catalog
 4. Keep answers SHORT: 1-3 sentences for simple questions, 4-5 sentences for product recommendations
-5. For price questions → show formatted price with VND
+5. For price questions → show formatted price with $
 6. If user wants to buy → guide them to add to cart on the website
 7. Be enthusiastic and helpful
 8. Always respond in English when user writes in English</instructions>`;
     } else {
         return `<instructions>
-Bạn là chuyên viên tư vấn bán hàng của "Sportstores" - cửa hàng thể thao online tại Việt Nam.
-- Sản phẩm: Đồ thể thao Nam/Nữ, giày bóng đá/bóng rổ, dụng cụ gym, giày chạy bộ, phụ kiện thể thao
-- Thanh toán: Thẻ tín dụng, Google Pay, Chuyển khoản, COD (nhận hàng trả tiền)
-- Giao hàng: Toàn quốc
-- Đổi trả: 7 ngày với sản phẩm chưa sử dụng
+You are an expert sales assistant at "Sportstores", a Vietnamese online sports retail store.
+- Products: Men's/Women's sportswear, soccer/basketball shoes, gym equipment, running shoes, sports accessories
+- Payment: Credit Card, Google Pay, Bank Transfer, COD (Cash on Delivery)
+- Shipping: Nationwide delivery
+- Return: 7-day return policy for unused items
 
-DANH MỤC SẢN PHẨM:\n${productContext}
+PRODUCT CATALOG:\n${productContext}
 
-QUY TẮC QUAN TRỌNG:
-1. Nếu sản phẩm CÓ trong danh sách trên → trả lời tự tin, dùng đúng thông tin (tên, giá, size, mô tả)
-2. Nếu sản phẩm KHÔNG có trong danh sách → nói: "Xin lỗi, sản phẩm đó hiện không có trong cửa hàng. Bạn có thể thử tìm sản phẩm khác hoặc liên hệ hotline để được hỗ trợ." KHÔNG đề xuất thêm thông tin giả
-3. TUYỆT ĐỐI KHÔNG bịa đặt thông tin sản phẩm không có trong danh sách
-4. Trả lời NGẮN GỌN: 1-3 câu cho câu hỏi đơn giản, 4-5 câu cho tư vấn sản phẩm
-5. Hỏi giá → hiển thị giá đã format tiền VND
-6. Khách muốn mua → hướng dẫn thêm vào giỏ hàng trên website
-7. Nhiệt tình, thân thiện, tư vấn chính xác
-8. Luôn trả lời bằng tiếng Việt</instructions>`;
+IMPORTANT RULES:
+1. If a product exists in the catalog above → answer confidently using real data
+2. If a product does NOT exist → say: "Sorry, that product is currently not available. Try searching for other products or contact our hotline."
+3. NEVER invent product information
+4. Keep answers SHORT
+5. For price questions → show formatted price with $
+6. Be enthusiastic and helpful
+7. Always respond in Vietnamese when user writes in Vietnamese</instructions>`;
     }
 };
 
-// Hàm xác định ngôn ngữ từ message
+// Language detection function from message
 const detectLanguage = (message) => {
     if (!message) return 'vi';
     const vietnamesePattern = /[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđĐ]/i;
     return vietnamesePattern.test(message) ? 'vi' : 'en';
 };
 
-// Chatbot: trước đây chỉ .limit(50) không sort → nhiều sản phẩm (vd. "AAAA") không bao giờ vào context.
+// Chatbot: previously only .limit(50) without sort → many products (e.g. "AAAA") never entered context.
 const CHAT_PRODUCT_FIELDS = 'name new_price old_price detailedCategory generalCategory size description';
 const CHAT_MAX_PRODUCTS = parseInt(process.env.CHAT_MAX_PRODUCTS, 10) || 500;
 
@@ -2183,7 +2212,7 @@ function extractChatKeywords(text) {
     return [...out];
 }
 
-/** Luôn sort theo id; ưu tiên sản phẩm có tên khớp từ khóa trong câu hỏi. */
+/** Always sort by id; prioritize products with name matching keywords in the question. */
 async function loadProductsForChatbot(userMessage) {
     const tokens = extractChatKeywords(userMessage);
     let matched = [];
@@ -2203,7 +2232,7 @@ async function loadProductsForChatbot(userMessage) {
     return products;
 }
 
-// Kiểm tra nhanh: mở GET http://localhost:4000/api/chat/health trong trình duyệt
+// Quick check: open GET http://localhost:4000/api/chat/health in browser
 app.get('/api/chat/health', (req, res) => {
     res.json({
         ok: true,
@@ -2224,21 +2253,21 @@ app.post('/api/chat', async (req, res) => {
 
         const products = await loadProductsForChatbot(message);
 
-        // Xác định ngôn ngữ và tạo system prompt tương ứng
+        // Determine language and create corresponding system prompt
         const language = detectLanguage(message);
         const systemPrompt = getSystemPrompt(products, language);
 
-        // Build messages array cho Ollama (đúng thứ tự: system -> history -> user)
+        // Build messages array for Ollama (correct order: system -> history -> user)
         const messages = [
             { role: 'system', content: systemPrompt },
             ...history.map(h => ({ role: h.role, content: h.content })),
             { role: 'user', content: message }
         ];
 
-        // Log prompt size để debug
+        // Log prompt size for debug
         console.log(`[ChatBot] Using model: ${OLLAMA_MODEL} | Prompt chars: ${systemPrompt.length} | History: ${history.length} msgs`);
 
-        // Gọi Ollama API với timeout 60 giây
+        // Call Ollama API with 60 second timeout
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 60000);
 
@@ -2269,7 +2298,7 @@ app.post('/api/chat', async (req, res) => {
         }
 
         const data = await response.json();
-        const reply = data.message?.content?.trim() || 'Xin lỗi, tôi không thể trả lời lúc này.';
+        const reply = data.message?.content?.trim() || 'Sorry, I cannot respond at this time.';
         res.json({ response: reply, language });
 
     } catch (error) {
@@ -2288,7 +2317,7 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
-// API lấy thông tin sản phẩm cho chatbot context (debug / đồng bộ với shop)
+// API to get product info for chatbot context (debug / sync with shop)
 app.get('/api/chat/products', async (req, res) => {
     try {
         const products = await Product.find({}, CHAT_PRODUCT_FIELDS).sort({ id: 1 }).limit(CHAT_MAX_PRODUCTS).lean();
@@ -2300,7 +2329,9 @@ app.get('/api/chat/products', async (req, res) => {
 
 
 // ============ GLOBAL ERROR HANDLER ============
-// Xử lý tất cả lỗi không được handle ở trên
+// Handle all unhandled errors above
+// Handle all unhandled errors above
+
 app.use((err, req, res, next) => {
     console.error('=== GLOBAL ERROR HANDLER ===');
     console.error('Error name:', err.name);
@@ -2309,7 +2340,7 @@ app.use((err, req, res, next) => {
     console.error('Request path:', req.path);
     console.error('Request method:', req.method);
     
-    // Xử lý lỗi Multer (file upload)
+    // Handle Multer errors (file upload)
     if (err.name === 'MulterError') {
         console.error('MulterError code:', err.code);
         console.error('MulterError message:', err.message);
@@ -2317,38 +2348,36 @@ app.use((err, req, res, next) => {
         if (err.code === 'LIMIT_FILE_SIZE') {
             return res.status(400).json({
                 success: false,
-                error: 'File quá lớn. Vui lòng chọn file nhỏ hơn.'
+                error: 'File too large. Please choose a smaller file.'
             });
         }
         if (err.code === 'LIMIT_FILE_COUNT') {
             return res.status(400).json({
                 success: false,
-                error: 'Quá nhiều files. Chỉ được upload tối đa 5 files.'
+                error: 'Too many files. Maximum 5 files allowed.'
             });
         }
         if (err.code === 'LIMIT_UNEXPECTED_FILE') {
             return res.status(400).json({
                 success: false,
-                error: 'Field name không hợp lệ. Sử dụng "images" làm field name.'
+                error: 'Invalid field name. Use "images" as the field name.'
             });
         }
-        
+
         return res.status(400).json({
             success: false,
-            error: 'Lỗi upload file: ' + err.message
+            error: 'File upload error: ' + err.message
         });
     }
-    
-    // Xử lý lỗi Cloudinary
+
+    // Handle Cloudinary errors
     if (err.message && err.message.includes('cloudinary')) {
         console.error('Cloudinary error details:', err);
         return res.status(500).json({
             success: false,
-            error: 'Lỗi Cloudinary: ' + err.message
+            error: 'Cloudinary error: ' + err.message
         });
     }
-    
-    // Xử lý các lỗi khác
     res.status(err.status || 500).json({
         success: false,
         error: err.message || 'Internal Server Error',
@@ -2356,7 +2385,7 @@ app.use((err, req, res, next) => {
     });
 });
 
-// 404 handler - xử lý các route không tìm thấy
+// 404 handler - handle routes not found
 app.use((req, res) => {
     console.log('404 - Route not found:', req.method, req.path);
     res.status(404).json({
@@ -2366,22 +2395,23 @@ app.use((req, res) => {
 });
 
 
-    async function startServer() {
-        const mongoUri = process.env.MONGODB_URI;
-        if (!mongoUri) {
-            console.error('Thiếu MONGODB_URI. Trên Render: Environment → Add → MONGODB_URI = chuỗi kết nối MongoDB Atlas.');
-            process.exit(1);
-        }
-        try {
-            await mongoose.connect(mongoUri);
-            console.log('Đã kết nối MongoDB.');
-            server.listen(port, () => {
-                console.log('Server Running on Port: ' + port);
-                console.log('Chatbot: POST .../api/chat | Health: GET .../api/chat/health');
-            });
-        } catch (err) {
-            console.error('Lỗi kết nối MongoDB:', err.message);
-            process.exit(1);
-        }
+async function startServer() {
+    const mongoUri = process.env.MONGODB_URI;
+    if (!mongoUri) {
+        console.error('Missing MONGODB_URI. On Render: Environment → Add → MONGODB_URI = your MongoDB Atlas connection string.');
+        process.exit(1);
     }
-    startServer();
+    try {
+        await mongoose.connect(mongoUri);
+        console.log('MongoDB connected.');
+        server.listen(port, () => {
+            console.log('Server Running on Port: ' + port);
+            console.log('Chatbot: POST .../api/chat | Health: GET .../api/chat/health');
+        });
+    } catch (err) {
+        console.error('MongoDB connection error:', err.message);
+        process.exit(1);
+    }
+}
+
+startServer();

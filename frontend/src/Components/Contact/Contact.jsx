@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './Contact.css';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock } from 'react-icons/fa';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 import API_BASE_URL from '../../config';
 
 const Contact = () => {
@@ -26,7 +27,7 @@ const Contact = () => {
         e.preventDefault();
     
         try {
-            // Gửi dữ liệu form đến server
+            // Gửi dữ liệu form lên server
             const response = await fetch(`${API_BASE_URL}/submit-contact-form`, {
                 method: 'POST',
                 headers: {
@@ -44,16 +45,16 @@ const Contact = () => {
                     subject: '',
                     message: ''
                 });
-                alert('Thank you for your message. We will contact you soon!');
+                toast.success('Thank you for your message. We will contact you soon!');
             } else {
                 // Xử lý lỗi
                 console.error('Failed to submit form');
                 const errorData = await response.json();
-                alert('Error submitting form: ' + errorData.error); 
+                toast.error('Error submitting form: ' + errorData.error);
             }
         } catch (error) {
             console.error('Error submitting form:', error);
-            alert('Error submitting form');
+            toast.error('Error submitting form');
         }
     };
 

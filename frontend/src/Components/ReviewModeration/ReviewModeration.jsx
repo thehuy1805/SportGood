@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import '../ReviewModeration/ReviewModeration.css';
+import { toast } from 'react-toastify';
 import API_BASE_URL from '../../config';
 
 const ReviewModeration = () => {
@@ -51,7 +52,7 @@ const ReviewModeration = () => {
                 r._id === reviewId ? { ...r, isVisible: data.isVisible } : r
             ));
         } catch (err) {
-            alert('Error: ' + err.message);
+            toast.error('Error: ' + err.message);
         } finally {
             setActionLoading(null);
         }
@@ -71,7 +72,7 @@ const ReviewModeration = () => {
             setReviews(prev => prev.filter(r => r._id !== reviewId));
             setConfirmDelete(null);
         } catch (err) {
-            alert('Error: ' + err.message);
+            toast.error('Error: ' + err.message);
         } finally {
             setActionLoading(null);
         }

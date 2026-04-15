@@ -13,13 +13,7 @@ const MyProfilePage = () => {
         email: '',
         phone: ''
     });
-    const [showPasswordForm, setShowPasswordForm] = useState(false);
-    const [passwordData, setPasswordData] = useState({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-    });
-    const [passwordError, setPasswordError] = useState('');
+    const [passwordChangedAt, setPasswordChangedAt] = useState(null);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -34,6 +28,9 @@ const MyProfilePage = () => {
                         email: data.user.email || '',
                         phone: data.user.phone || ''
                     });
+                    if (data.user.passwordChangedAt) {
+                        setPasswordChangedAt(data.user.passwordChangedAt);
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching profile:', error);
@@ -85,44 +82,19 @@ const MyProfilePage = () => {
         }
     };
 
-    const handleChangePassword = async (e) => {
-        e.preventDefault();
-        setPasswordError('');
-        if (passwordData.newPassword.length < 6) {
-            setPasswordError('New password must be at least 6 characters.');
-            return;
-        }
-        if (passwordData.newPassword !== passwordData.confirmPassword) {
-            setPasswordError('Passwords do not match.');
-            return;
-        }
-        setSaving(true);
-        try {
-            const res = await fetch(`${API_BASE_URL}/update-password`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'auth-token': localStorage.getItem('auth-token')
-                },
-                body: JSON.stringify({
-                    email: formData.email,
-                    currentPassword: passwordData.currentPassword,
-                    password: passwordData.newPassword
-                })
-            });
-            const data = await res.json();
-            if (data.success) {
-                setMessage({ type: 'success', text: 'Password changed successfully!' });
-                setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-                setShowPasswordForm(false);
-            } else {
-                setPasswordError(data.error || 'Failed to change password.');
-            }
-        } catch {
-            setPasswordError('Something went wrong. Please try again.');
-        } finally {
-            setSaving(false);
-        }
+    const formatDate = (dateString) => {
+        if (!dateString) return 'Unknown';
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffTime = Math.abs(now - date);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) return 'Today';
+        if (diffDays === 1) return 'Yesterday';
+        if (diffDays < 7) return `${diffDays} days ago`;
+        if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+        if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+        return `${Math.floor(diffDays / 365)} years ago`;
     };
 
     if (loading) {
@@ -263,7 +235,7 @@ const MyProfilePage = () => {
                         </form>
                     </div>
 
-                    {/* Password Card */}
+                    {/* Security Card */}
                     <div className="profile-card">
                         <div className="profile-card-header">
                             <h3>Security</h3>
@@ -279,95 +251,19 @@ const MyProfilePage = () => {
                                     </div>
                                     <div>
                                         <span className="security-item-label">Password</span>
-                                        <span className="security-item-desc">Last changed: Unknown</span>
+                                        <span className="security-item-desc">Last changed: {formatDate(passwordChangedAt)}</span>
                                     </div>
                                 </div>
-                                <button
-                                    className="security-change-btn"
-                                    onClick={() => setShowPasswordForm(!showPasswordForm)}
-                                >
-                                    {showPasswordForm ? 'Cancel' : 'Change'}
-                                </button>
                             </div>
 
-                            {showPasswordForm && (
-                                <form className="password-form" onSubmit={handleChangePassword}>
-                                    {passwordError && (
-                                        <div className="profile-message error">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                                <circle cx="12" cy="12" r="10"></circle>
-                                                <line x1="15" y1="9" x2="9" y2="15"></line>
-                                                <line x1="9" y1="9" x2="15" y2="15"></line>
-                                            </svg>
-                                            {passwordError}
-                                        </div>
-                                    )}
-
-                                    <div className="profile-form-group">
-                                        <label>Current Password</label>
-                                        <div className="profile-input-wrapper">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                                            </svg>
-                                            <input
-                                                type="password"
-                                                value={passwordData.currentPassword}
-                                                onChange={(e) => setPasswordData(p => ({ ...p, currentPassword: e.target.value }))}
-                                                placeholder="Enter current password"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="profile-form-group">
-                                        <label>New Password</label>
-                                        <div className="profile-input-wrapper">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                                            </svg>
-                                            <input
-                                                type="password"
-                                                value={passwordData.newPassword}
-                                                onChange={(e) => setPasswordData(p => ({ ...p, newPassword: e.target.value }))}
-                                                placeholder="At least 6 characters"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="profile-form-group">
-                                        <label>Confirm New Password</label>
-                                        <div className="profile-input-wrapper">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                                            </svg>
-                                            <input
-                                                type="password"
-                                                value={passwordData.confirmPassword}
-                                                onChange={(e) => setPasswordData(p => ({ ...p, confirmPassword: e.target.value }))}
-                                                placeholder="Re-enter new password"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <button type="submit" className="profile-save-btn" disabled={saving}>
-                                        {saving ? (
-                                            <div className="profile-btn-spinner" />
-                                        ) : (
-                                            <>
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                                                </svg>
-                                                Update Password
-                                            </>
-                                        )}
-                                    </button>
-                                </form>
-                            )}
+                            <div className="security-hint">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                </svg>
+                                <span>To change your password, use the "Forgot Password" option on the login page.</span>
+                            </div>
                         </div>
                     </div>
                 </div>

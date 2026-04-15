@@ -149,17 +149,17 @@
   background: #f1f5f9;
   border-radius: 12px;
   padding: 4px;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 
 .auth-tab {
   flex: 1;
-  padding: 10px;
+  padding: 12px 16px;
   text-align: center;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   color: #94a3b8;
-  border-radius: 9px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.25s ease;
   border: none;
@@ -171,6 +171,7 @@
   background: #ffffff;
   color: #f97316;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  font-weight: 700;
 }
 
 .auth-tab:hover:not(.active) {
@@ -179,11 +180,11 @@
 
 /* ---------- Form Header ---------- */
 .auth-form-header {
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .auth-form-title {
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 800;
   color: #0f172a;
   margin: 0 0 6px;
@@ -215,6 +216,10 @@
 
 .auth-input-wrapper {
   position: relative;
+}
+
+.auth-input-wrapper .auth-input {
+  padding-right: 44px;
 }
 
 .auth-input {
@@ -265,7 +270,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
+  padding: 12px 14px;
   border-radius: 10px;
   font-size: 13px;
   font-weight: 600;
@@ -364,7 +369,8 @@
 /* ---------- Forgot Password ---------- */
 .auth-forgot-link {
   text-align: center;
-  margin-top: 12px;
+  margin-top: 16px;
+  margin-bottom: 8px;
 }
 
 .auth-forgot-link span {
@@ -384,7 +390,7 @@
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  margin-top: 20px;
+  margin-top: 16px;
 }
 
 .auth-terms-row input[type="checkbox"] {
@@ -395,7 +401,7 @@
   cursor: pointer;
   accent-color: #f97316;
   flex-shrink: 0;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 .auth-terms-text {
@@ -420,7 +426,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 24px 0;
+  margin: 20px 0;
 }
 
 .auth-divider-line {
@@ -475,14 +481,14 @@
 }
 
 .auth-back-btn {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #f1f5f9;
   border: 1px solid #e2e8f0;
-  border-radius: 9px;
+  border-radius: 10px;
   color: #64748b;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -557,6 +563,42 @@
   background: #4ade80;
 }
 
+/* ---------- Uniform Spacing for All Form Elements ---------- */
+.auth-form-wrapper .auth-input-group:nth-last-child(2) {
+  margin-bottom: 12px;
+}
+
+.auth-form-wrapper .auth-terms-row {
+  margin-bottom: 0;
+}
+
+/* ---------- Consistent Button Heights ---------- */
+.auth-submit-btn {
+  height: 50px;
+  line-height: 50px;
+  padding: 0 24px;
+}
+
+/* ---------- Uniform Border Radius ---------- */
+.auth-input,
+.auth-tabs,
+.auth-tab,
+.auth-submit-btn,
+.auth-social-btn,
+.auth-forgot-btn,
+.auth-back-btn,
+.auth-message,
+.auth-step-dot {
+  border-radius: 10px;
+}
+
+/* ---------- Focus States ---------- */
+.auth-input:focus,
+.auth-social-btn:focus,
+.auth-submit-btn:focus {
+  outline: none;
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
   .auth-panel-left {
@@ -576,5 +618,17 @@
 
   .auth-brand-tagline {
     font-size: 32px;
+  }
+
+  .auth-form-title {
+    font-size: 22px;
+  }
+
+  .auth-tabs {
+    margin-bottom: 24px;
+  }
+
+  .auth-input-group {
+    margin-bottom: 14px;
   }
 }

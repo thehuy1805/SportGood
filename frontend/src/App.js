@@ -6,6 +6,8 @@ import SizeGuide from './Components/SizeGuide/SizeGuide';
 import ChatBot from './Components/ChatBot/ChatBot';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useEffect, useContext } from 'react';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Shop from './Pages/Shop';
 import HomeShop from './Pages/HomeShop';
 import Men from './Pages/Men';
@@ -176,8 +178,8 @@ function AppContent() {
 
 function App() {
     const location = useLocation();
-    // Chỉ ẩn Navbar/Footer trong khu vực admin & staff (có sidebar riêng).
-    // Khi admin/staff xem shop, cart, v.v. vẫn hiển thị Navbar + Footer như người dùng thường.
+// Chỉ ẩn Navbar/Footer trong khu vực admin & staff (chúng có sidebar riêng).
+// Khi admin/staff xem cửa hàng, giỏ hàng,... Navbar + Footer vẫn hiển thị như người dùng thông thường.
     const isDashboardShell =
         location.pathname.startsWith('/admin') || location.pathname.startsWith('/staff');
     const showNavbarFooter = !isDashboardShell;
@@ -191,6 +193,17 @@ function App() {
                 {showNavbarFooter && <Footer />}
 
                 <ChatBot />
+
+                <ToastContainer
+                    position="top-right"
+                    autoClose={4000}
+                    hideProgressBar={false}
+                    newestOnTop
+                    closeOnClick
+                    pauseOnHover
+                    draggable
+                    theme="colored"
+                />
         </div>
     );
 }

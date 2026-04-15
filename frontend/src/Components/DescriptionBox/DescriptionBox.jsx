@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import './DescriptionBox.css';
 import { AuthContext } from '../../Context/AuthContext';
+import { toast } from 'react-toastify';
 import API_BASE_URL from '../../config';
 
 const StarIcon = ({ filled }) => (
@@ -72,11 +73,11 @@ const DescriptionBox = ({ productId, product, onFeedbacksChange }) => {
     event.preventDefault();
     if (!isLoggedIn) return;
     if (newFeedback.rating === 0) {
-      alert('Please select a star rating.');
+      toast.warn('Please select a star rating.');
       return;
     }
     if (!newFeedback.content.trim()) {
-      alert('Please write your review.');
+      toast.warn('Please write your review.');
       return;
     }
 

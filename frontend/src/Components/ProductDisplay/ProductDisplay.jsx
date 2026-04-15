@@ -4,6 +4,7 @@ import './ProductDisplay.css';
 import { ShopContext } from '../../Context/ShopContext';
 import useProductStore from '../../store/productStore';
 import { ShoppingCart, ChevronRight, Package, ShieldCheck, Truck, RotateCcw, Heart } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const SHOE_CATEGORIES = ['Soccer Shoes', 'Basketball Shoes'];
 
@@ -77,7 +78,7 @@ const ProductDisplay = ({ product, feedbacks }) => {
         }
 
         if (!isSports && !selectedSize) {
-            alert('Vui lòng chọn size trước khi thêm vào giỏ hàng.');
+            toast.warn('Please select a size before adding to cart.');
             return;
         }
 

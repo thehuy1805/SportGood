@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import './UpdateProduct.css';
 import API_BASE_URL from '../../config';
 
-// 独立的 Update Modal 组件（用于 ListProduct 页面内联调用）
+// Thành phần Modal cập nhật độc lập (dùng trong trang ListProduct)
 export const UpdateProductModal = ({ product, onClose, onUpdated }) => {
   const [form, setForm] = useState({
     name: product.name || '',
@@ -28,7 +29,7 @@ export const UpdateProductModal = ({ product, onClose, onUpdated }) => {
     const { name, value } = e.target;
     setForm(prev => {
       const next = { ...prev, [name]: value };
-      // 当 generalCategory 改变时，重置 detailedCategory
+      // Khi generalCategory thay đổi, đặt lại detailedCategory
       if (name === 'generalCategory') {
         next.detailedCategory = detailedCategories[value][0];
       }
@@ -72,11 +73,11 @@ export const UpdateProductModal = ({ product, onClose, onUpdated }) => {
         onUpdated();
         onClose();
       } else {
-        alert(data.error || 'Update failed!');
+        toast.error(data.error || 'Update failed!');
       }
     } catch (error) {
       console.error('Update error:', error);
-      alert('An error occurred while updating.');
+      toast.error('An error occurred while updating.');
     } finally {
       setLoading(false);
     }
@@ -88,7 +89,7 @@ export const UpdateProductModal = ({ product, onClose, onUpdated }) => {
         {/* Header */}
         <div className="upm-header">
           <h2 className="upm-title">Update Product</h2>
-          <button className="upm-close" onClick={onClose} title="Đóng">
+          <button className="upm-close" onClick={onClose} title="Close">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -179,9 +180,7 @@ export const UpdateProductModal = ({ product, onClose, onUpdated }) => {
 };
 
 // =====================================================
-// =====================================================
-// UpdateProduct Page (standalone page - size editing removed)
-// =====================================================
+// Trang cập nhật sản phẩm (trang độc lập - đã xóa chỉnh sửa kích thước)
 // =====================================================
 const UpdateProduct = () => {
   const { id } = useParams();
@@ -254,14 +253,14 @@ const UpdateProduct = () => {
       });
       const data = await response.json();
       if (data.success) {
-        alert('Product updated successfully!');
+        toast.success('Product updated successfully!');
         navigate('/admin/list-product');
       } else {
-        alert('Update failed!');
+        toast.error('Update failed!');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('An error occurred.');
+      toast.error('An error occurred.');
     }
   };
 

@@ -24,7 +24,7 @@ const WomenProduct = ({
         );
         setProducts(womenProducts);
 
-        // Fetch feedbacks cho tất cả sản phẩm Women
+        // Lấy đánh giá cho tất cả sản phẩm nữ
         const feedbacksPromises = womenProducts.map(async (product) => {
           const feedbackResponse = await fetch(
             `${API_BASE_URL}/get-feedbacks/${product.id}`
@@ -77,7 +77,7 @@ const WomenProduct = ({
     } else if (sortOrder === "rating") {
       const aRating = calculateAverageRating(productFeedbacks[a.id]);
       const bRating = calculateAverageRating(productFeedbacks[b.id]);
-      return bRating - aRating; // Sắp xếp theo rating
+      return bRating - aRating; // Sắp xếp theo đánh giá
     }
     return 0;
   });

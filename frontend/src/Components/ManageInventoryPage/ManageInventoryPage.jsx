@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import './ManageInventoryPage.css';
 import { ShopContext } from '../../Context/ShopContext';
+import { toast } from 'react-toastify';
 import API_BASE_URL from '../../config';
 
 const SHOE_CATEGORIES = ['Soccer Shoes', 'Basketball Shoes'];
@@ -25,7 +26,7 @@ const ManageInventoryPage = () => {
     setProducts(all_product);
   }, [all_product]);
 
-  // ── fetchProducts phải khai báo TRƯỚC useEffect gọi nó ──
+  // ── fetchProducts phải được khai báo TRƯỚC useEffect gọi nó ──
   const fetchProducts = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/allproducts`);
@@ -57,7 +58,7 @@ const ManageInventoryPage = () => {
 
   const updateStock = async (id, newStock, newSizeStatus) => {
     if (newStock !== undefined && (isNaN(newStock) || newStock < 0)) {
-      alert('Please enter a valid quantity (0 or greater)');
+      toast.warn('Please enter a valid quantity (0 or greater)');
       return;
     }
     try {
@@ -65,11 +66,11 @@ const ManageInventoryPage = () => {
         stock: newStock,
         sizeStatus: newSizeStatus,
       });
-      alert('Inventory updated successfully');
+      toast.success('Inventory updated successfully!');
       fetchProducts();
     } catch (error) {
       console.error('Error:', error);
-      alert('Unable to update inventory');
+      toast.error('Unable to update inventory');
     }
   };
 

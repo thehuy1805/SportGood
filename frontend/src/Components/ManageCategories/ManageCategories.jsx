@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './ManageCategories.css';
+import { toast } from 'react-toastify';
 import API_BASE_URL from '../../config';
 
 const ManageCategories = () => {
@@ -54,7 +55,7 @@ const ManageCategories = () => {
 
     const handleAddCategory = async () => {
         if (!generalCategory || !detailedCategoryName) {
-            alert('Please select a general category and provide a name.');
+            toast.warn('Please select a general category and provide a name.');
             return;
         }
         let finalSizes = [];
@@ -70,14 +71,14 @@ const ManageCategories = () => {
                 sizes: finalSizes,
             });
             if (response.data.success) {
-                alert('Category added successfully!');
+                toast.success('Category added successfully!');
                 fetchDetailedCategories();
                 setGeneralCategory('');
                 setType('');
                 setDetailedCategoryName('');
                 setSizes([]);
             } else {
-                alert(response.data.error || 'Failed to add category');
+                toast.error(response.data.error || 'Failed to add category');
             }
         } catch (error) {
             console.error('Error:', error);
@@ -89,15 +90,15 @@ const ManageCategories = () => {
         try {
             const check = await axios.get(`${API_BASE_URL}/checkProductsInCategory/${id}`);
             if (check.data.hasProducts) {
-                alert(`Cannot delete. ${check.data.productCount} products exist in this category.`);
+                toast.error(`Cannot delete. ${check.data.productCount} products exist in this category.`);
                 return;
             }
             const response = await axios.delete(`${API_BASE_URL}/deleteDetailedCategory/${id}`);
             if (response.data.success) {
-                alert('Category deleted!');
+                toast.success('Category deleted!');
                 fetchDetailedCategories();
             } else {
-                alert(response.data.error || 'Failed to delete');
+                toast.error(response.data.error || 'Failed to delete');
             }
         } catch (error) {
             console.error('Error:', error);

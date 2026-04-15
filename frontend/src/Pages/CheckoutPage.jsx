@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShopContext } from '../Context/ShopContext';
+import { toast } from 'react-toastify';
 import './CSS/CheckoutPage.css';
 import cardIcon from '../Components/Assets/img_card.png';
 import gpayIcon from '../Components/Assets/gpayIcon.svg';
@@ -146,11 +147,11 @@ const CheckoutPage = () => {
                 navigate(`/order-confirmation?orderId=${orderId}`);
             } else {
                 const errorData = await response.json();
-                alert("Thanh toán thất bại: " + errorData.error);
+                toast.error("Payment failed: " + errorData.error);
             }
         } catch (error) {
-            console.error('Lỗi khi gửi yêu cầu thanh toán:', error);
-            alert("Đã xảy ra lỗi. Vui lòng thử lại sau.");
+            console.error('Payment request error:', error);
+            toast.error("An error occurred. Please try again later.");
         }
     };
 
@@ -190,6 +191,8 @@ const CheckoutPage = () => {
     };
 
     const total = getTotalCartAmount();
+    const shippingCost = total >= 100 ? 0 : 15;
+    const grandTotal = total + shippingCost;
 
     return (
         <div className="checkout-page">
@@ -641,7 +644,9 @@ const CheckoutPage = () => {
                                 </div>
                                 <div className="summary-row">
                                     <span className="summary-row-label">Shipping</span>
-                                    <span className="summary-row-value free">Free</span>
+                                    <span className={`summary-row-value ${shippingCost === 0 ? 'free' : ''}`}>
+                                        {shippingCost === 0 ? 'Free' : `$${shippingCost.toFixed(2)}`}
+                                    </span>
                                 </div>
                                 <div className="summary-row">
                                     <span className="summary-row-label">Tax</span>
@@ -653,7 +658,7 @@ const CheckoutPage = () => {
 
                             <div className="summary-total-row">
                                 <span className="summary-total-label">Total</span>
-                                <span className="summary-total-amount">${total.toFixed(2)}</span>
+                                <span className="summary-total-amount">${grandTotal.toFixed(2)}</span>
                             </div>
 
                             <div className="delivery-promise">

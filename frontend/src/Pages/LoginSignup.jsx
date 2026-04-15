@@ -59,12 +59,14 @@ export const LoginSignup = () => {
                 login(data.token, data.role, data.user.id, data.name);
                 const returnUrl = localStorage.getItem('returnAfterLogin');
                 localStorage.removeItem('returnAfterLogin');
-                if (returnUrl) {
-                    navigate(returnUrl, { replace: true });
-                } else if (data.role === 'admin') {
+
+                // Neu la admin hoac staff, chuyen huong ve trang tuong ung bo qua returnUrl
+                if (data.role === 'admin') {
                     navigate('/admin', { replace: true });
                 } else if (data.role === 'staff') {
                     navigate('/staff', { replace: true });
+                } else if (returnUrl) {
+                    navigate(returnUrl, { replace: true });
                 } else {
                     navigate('/', { replace: true });
                 }

@@ -1,4 +1,4 @@
-// SportsEquipment.jsx
+// Trang SportsEquipment.jsx
 import React, { useState, useRef, useEffect } from 'react';
 
 import SportsEquipmentProduct from '../Components/SportsEquipmentProduct/SportsEquipmentProduct'; 
@@ -51,7 +51,7 @@ export const SportsEquipment = () => {
                         initialSortOrder="rating"
                     />
                     <ProductCategory 
-                        generalCategory="Sports Equipment" // Thêm generalCategory vào đây
+                        generalCategory="Sports Equipment" // Thêm generalCategory ở đây
                         onDetailedCategorySelect={category => { 
                             handleBeforeChange(); 
                             setDetailedCategory(category); 

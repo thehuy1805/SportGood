@@ -34,7 +34,7 @@ const LowStockAlerts = () => {
         fetchAlerts();
     }, []);
 
-    // Nhóm alerts theo productId
+    // Nhóm cảnh báo theo productId
     const groupedByProduct = {};
     alerts.forEach(alert => {
         if (!groupedByProduct[alert.productId]) {

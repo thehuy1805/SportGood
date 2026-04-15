@@ -22,7 +22,7 @@ const AuthContextProvider = ({ children }) => {
             const storedToken = localStorage.getItem('auth-token');
             const storedRole = localStorage.getItem('role');
             const storedUserId = localStorage.getItem('user-id');
-            const storedName = localStorage.getItem('user-name'); // Lấy userName từ local storage
+            const storedName = localStorage.getItem('user-name'); // Lấy userName từ localStorage
 
             if (storedToken) {
                 setIsLoggedIn(true);
@@ -48,28 +48,28 @@ const AuthContextProvider = ({ children }) => {
         };
     }, []);
 
-    const login = (token, role, id, name) => { // Cập nhật hàm login để nhận thêm name
+    const login = (token, role, id, name) => { // Cập nhật hàm login để nhận name
         localStorage.setItem('auth-token', token);
         localStorage.setItem('role', role);
         localStorage.setItem('user-id', id);
-        localStorage.setItem('user-name', name); // Lưu name vào local storage
+        localStorage.setItem('user-name', name); // Lưu name vào localStorage
         setIsLoggedIn(true);
         setToken(token);
         setUserId(id);
         setRole(role);
-        setUserName(name); // Cập nhật userName
+        setUserName(name); // Update userName
     };
 
     const logout = () => {
         localStorage.removeItem('auth-token');
         localStorage.removeItem('role');
         localStorage.removeItem('user-id');
-        localStorage.removeItem('user-name'); // Xóa userName khỏi local storage
+        localStorage.removeItem('user-name'); // Xóa userName khỏi localStorage
         setIsLoggedIn(false);
         setToken(null);
         setRole(null);
         setUserId(null);
-        setUserName(null); // Cập nhật userName
+        setUserName(null); // Update userName
         
     };
 

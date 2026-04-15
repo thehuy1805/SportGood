@@ -10,7 +10,7 @@ const ChatBot = () => {
     const [messages, setMessages] = useState([
         {
             role: 'assistant',
-            content: 'Xin chào! 👋 Tôi là trợ lý AI của Sportstores. Tôi có thể giúp gì cho bạn hôm nay?',
+            content: 'Hello! I\'m the Sportstores AI assistant. How can I help you today?',
             timestamp: new Date()
         }
     ]);
@@ -85,8 +85,8 @@ const ChatBot = () => {
             const is404 = error.status === 404;
             const errorMessage = language === 'vi'
                 ? (is404
-                    ? 'Không tìm thấy API chat (404). Hãy dừng tiến trình backend cũ trên cổng 4000, rồi chạy lại: cd backend && npm start. Mở http://localhost:4000/api/chat/health để kiểm tra.'
-                    : 'Xin lỗi, tôi đang gặp sự cố. Vui lòng thử lại sau.')
+                    ? 'Chat API not found (404). Stop the old backend on port 4000 and run: cd backend && npm start. Open http://localhost:4000/api/chat/health to verify.'
+                    : 'Sorry, I\'m having trouble responding. Please try again later.')
                 : (is404
                     ? 'Chat API not found (404). Stop the old backend on port 4000 and run: cd backend && npm start. Open http://localhost:4000/api/chat/health to verify.'
                     : 'Sorry, I\'m having trouble responding. Please try again later.');
@@ -116,10 +116,10 @@ const ChatBot = () => {
     };
 
     const quickReplies = language === 'vi' ? [
-        { text: 'Giới thiệu sản phẩm', query: 'Bạn có những sản phẩm gì?' },
-        { text: 'Chính sách đổi trả', query: 'Chính sách đổi trả như thế nào?' },
-        { text: 'Phương thức thanh toán', query: 'Các phương thức thanh toán được chấp nhận?' },
-        { text: 'Giao hàng', query: 'Thời gian giao hàng bao lâu?' }
+        { text: 'Show products', query: 'What products do you have?' },
+        { text: 'Return policy', query: 'What is your return policy?' },
+        { text: 'Payment methods', query: 'What payment methods do you accept?' },
+        { text: 'Shipping', query: 'How long does shipping take?' }
     ] : [
         { text: 'Show products', query: 'What products do you have?' },
         { text: 'Return policy', query: 'What is your return policy?' },
@@ -229,7 +229,7 @@ const ChatBot = () => {
                                     value={inputValue}
                                     onChange={(e) => setInputValue(e.target.value)}
                                     onKeyPress={handleKeyPress}
-                                    placeholder={language === 'vi' ? 'Nhập tin nhắn...' : 'Type a message...'}
+                                    placeholder={language === 'vi' ? 'Type a message...' : 'Type a message...'}
                                     disabled={isLoading}
                                 />
                                 <button

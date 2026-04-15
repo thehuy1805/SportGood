@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 
-// Component bảo vệ route cho user
+// Thành phần bảo vệ tuyến đường cho người dùng
 export const UserRoute = ({ children }) => {
     const token = localStorage.getItem('auth-token');
     const role = localStorage.getItem('role');
@@ -17,7 +17,7 @@ export const UserRoute = ({ children }) => {
     return children;
 };
 
-// Component bảo vệ route cho staff
+// Thành phần bảo vệ tuyến đường cho nhân viên
 export const StaffRoute = ({ children }) => {
     const token = localStorage.getItem('auth-token');
     const role = localStorage.getItem('role');
@@ -33,7 +33,7 @@ export const StaffRoute = ({ children }) => {
     return children;
 };
 
-// Component bảo vệ route cho admin
+// Thành phần bảo vệ tuyến đường cho quản trị viên
 export const AdminRoute = ({ children }) => {
     const token = localStorage.getItem('auth-token');
     const role = localStorage.getItem('role');
