@@ -2113,9 +2113,13 @@ app.post('/submit-contact-form', async (req, res) => {
 // ==========================================
 
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434/api/chat';
-// Llama 3.2 only has 1B/3B on Ollama — no llama3.2:7b tag. Use llama3.1:8b as default (stronger).
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.2:1b';
 const OLLAMA_TEMPERATURE = parseFloat(process.env.OLLAMA_TEMPERATURE) || 0.7;
+
+// Groq API — free tier, no GPU needed, works in production cloud
+const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
+const GROQ_MODEL = 'llama-3.1-70b-versatile';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 // System prompt for chatbot - optimized for 7B model
 const getSystemPrompt = (products, language = 'vi') => {
@@ -2267,46 +2271,81 @@ app.post('/api/chat', async (req, res) => {
         // Log prompt size for debug
         console.log(`[ChatBot] Using model: ${OLLAMA_MODEL} | Prompt chars: ${systemPrompt.length} | History: ${history.length} msgs`);
 
-        // Call Ollama API with 60 second timeout
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 60000);
+// === Use Groq if API key is available ===
+        if (GROQ_API_KEY) {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 30000);
 
-        const response = await fetch(OLLAMA_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                model: OLLAMA_MODEL,
-                messages: messages,
-                stream: false,
-                options: {
+            const response = await fetch(GROQ_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${GROQ_API_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: GROQ_MODEL,
+                    messages: messages,
                     temperature: OLLAMA_TEMPERATURE,
-                    top_p: 0.9,
-                    num_predict: 512
-                }
-            }),
-            signal: controller.signal
-        });
-        clearTimeout(timeout);
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Ollama API Error:', errorText);
-            return res.status(500).json({
-                error: 'AI service unavailable. Please check Ollama is running with the correct model.',
-                details: errorText
+                    max_tokens: 512
+                }),
+                signal: controller.signal
             });
+            clearTimeout(timeout);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Groq API Error:', errorText);
+                return res.status(500).json({
+                    error: 'AI service error. Please try again.',
+                    details: errorText
+                });
+            }
+
+            const data = await response.json();
+            reply = data.choices?.[0]?.message?.content?.trim() || '';
+        } else {
+            // === Fallback to local Ollama ===
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 60000);
+
+            const response = await fetch(OLLAMA_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: OLLAMA_MODEL,
+                    messages: messages,
+                    stream: false,
+                    options: {
+                        temperature: OLLAMA_TEMPERATURE,
+                        top_p: 0.9,
+                        num_predict: 512
+                    }
+                }),
+                signal: controller.signal
+            });
+            clearTimeout(timeout);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Ollama API Error:', errorText);
+                return res.status(500).json({
+                    error: 'AI service unavailable. Please check Ollama is running with the correct model.',
+                    details: errorText
+                });
+            }
+
+            const data = await response.json();
+            reply = data.message?.content?.trim() || '';
         }
 
-        const data = await response.json();
-        const reply = data.message?.content?.trim() || 'Sorry, I cannot respond at this time.';
-        res.json({ response: reply, language });
+        res.json({ response: reply || 'Sorry, I cannot respond at this time.', language });
 
     } catch (error) {
         if (error.name === 'AbortError') {
-            console.error('Chat API Error: Request timeout (model may be loading or too slow)');
+            console.error('Chat API Error: Request timeout');
             return res.status(504).json({
-                error: 'AI response took too long. Please try again (model may still be loading).',
-                details: 'Timeout after 60 seconds'
+                error: 'AI response took too long. Please try again.',
+                details: 'Timeout'
             });
         }
         console.error('Chat API Error:', error);
