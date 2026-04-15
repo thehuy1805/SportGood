@@ -2268,10 +2268,9 @@ app.post('/api/chat', async (req, res) => {
             { role: 'user', content: message }
         ];
 
-        // Log prompt size for debug
-        console.log(`[ChatBot] Using model: ${OLLAMA_MODEL} | Prompt chars: ${systemPrompt.length} | History: ${history.length} msgs`);
-
-// === Use Groq if API key is available ===
+        let reply;
+        const provider = GROQ_API_KEY ? 'Groq' : 'Ollama';
+        console.log(`[ChatBot] Provider: ${provider} | Prompt chars: ${systemPrompt.length} | History: ${history.length} msgs`);
         if (GROQ_API_KEY) {
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), 30000);
@@ -2366,9 +2365,20 @@ app.get('/api/chat/products', async (req, res) => {
     }
 });
 
+// Debug: check which AI provider is being used
+app.get('/api/chat/health', async (req, res) => {
+    const groqConfigured = !!GROQ_API_KEY;
+    res.json({
+        groqConfigured,
+        groqModel: GROQ_MODEL,
+        ollamaUrl: OLLAMA_URL,
+        ollamaModel: OLLAMA_MODEL,
+        provider: groqConfigured ? 'Groq' : 'Ollama (no API key)'
+    });
+});
+
 
 // ============ GLOBAL ERROR HANDLER ============
-// Handle all unhandled errors above
 // Handle all unhandled errors above
 
 app.use((err, req, res, next) => {
