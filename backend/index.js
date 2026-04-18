@@ -2118,7 +2118,7 @@ const OLLAMA_TEMPERATURE = parseFloat(process.env.OLLAMA_TEMPERATURE) || 0.7;
 
 // Groq API — free tier, no GPU needed, works in production cloud
 const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
-const GROQ_MODEL = 'llama-3.1-70b-versatile';
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 // System prompt for chatbot - optimized for 7B model
@@ -2236,17 +2236,7 @@ async function loadProductsForChatbot(userMessage) {
     return products;
 }
 
-// Quick check: open GET http://localhost:4000/api/chat/health in browser
-app.get('/api/chat/health', (req, res) => {
-    res.json({
-        ok: true,
-        chatPostPath: '/api/chat',
-        ollamaUrl: OLLAMA_URL,
-        model: OLLAMA_MODEL
-    });
-});
-
-// API Chat endpoint
+// Debug: check which AI provider is being used
 app.post('/api/chat', async (req, res) => {
     try {
         const { message, history = [] } = req.body;
@@ -2300,8 +2290,30 @@ app.post('/api/chat', async (req, res) => {
                 });
             }
 
-            const data = await response.json();
+            const responseData = await response.text();
+            if (!responseData || responseData.trim() === '') {
+                console.error('Groq API returned empty response');
+                return res.status(502).json({
+                    error: 'Empty response from AI service.',
+                    details: 'Groq returned no content'
+                });
+            }
+
+            let data;
+            try {
+                data = JSON.parse(responseData);
+            } catch (e) {
+                console.error('Groq JSON parse error:', responseData.substring(0, 200));
+                return res.status(502).json({
+                    error: 'Invalid JSON from AI service.',
+                    details: responseData.substring(0, 200)
+                });
+            }
+
             reply = data.choices?.[0]?.message?.content?.trim() || '';
+            if (!reply) {
+                console.error('Groq response has no content. Full response:', JSON.stringify(data).substring(0, 300));
+            }
         } else {
             // === Fallback to local Ollama ===
             const controller = new AbortController();
@@ -2336,6 +2348,8 @@ app.post('/api/chat', async (req, res) => {
             const data = await response.json();
             reply = data.message?.content?.trim() || '';
         }
+
+        console.log(`[ChatBot] Reply length: ${reply.length}, first 100 chars: "${reply.substring(0, 100)}"`);
 
         res.json({ response: reply || 'Sorry, I cannot respond at this time.', language });
 
