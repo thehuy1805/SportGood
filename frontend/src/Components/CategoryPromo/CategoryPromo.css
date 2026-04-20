@@ -1,0 +1,97 @@
+.category-promo {
+    max-width: 1200px;
+    margin: 0 auto 40px;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.promo-inner {
+    display: flex;
+    align-items: center;
+    gap: 48px;
+    padding: 48px 56px;
+}
+
+.promo-discount {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 140px;
+    height: 140px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.discount-value {
+    font-size: 44px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1;
+}
+
+.discount-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 2px;
+    margin-top: 4px;
+}
+
+.promo-content {
+    flex: 1;
+}
+
+.promo-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.promo-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 12px;
+}
+
+.promo-desc {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 24px;
+    line-height: 1.5;
+}
+
+.promo-cta {
+    padding: 14px 28px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.promo-cta:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+    .promo-inner {
+        flex-direction: column;
+        text-align: center;
+        padding: 40px 32px;
+        gap: 32px;
+    }
+
+    .promo-title {
+        font-size: 24px;
+    }
+}

@@ -107,3 +107,44 @@
     gap: 12px;
   }
 }
+
+/* ===== Footer CTA ===== */
+.pop-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.pop-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 36px;
+  background: linear-gradient(135deg, #f05353, #ec6059);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
+  box-shadow: 0 4px 16px rgba(240, 83, 83, 0.35);
+}
+
+.pop-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(240, 83, 83, 0.45);
+}
+
+.pop-btn:active {
+  transform: translateY(0);
+}
+
+.pop-btn-arrow {
+  font-size: 18px;
+  transition: transform 0.2s ease;
+}
+
+.pop-btn:hover .pop-btn-arrow {
+  transform: translateX(4px);
+}

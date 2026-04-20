@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import Item from "../../Components/Item/Item";
-import '../../Components/AllProduct/AllProduct.css';
+import FlipItem from '../FlipItem/FlipItem';
+import './WomenProduct.css';
 import API_BASE_URL from '../../config';
 
 const WomenProduct = ({
@@ -8,6 +8,7 @@ const WomenProduct = ({
   sortOrder,
   selectedCategory,
   detailedCategory,
+  onCategoriesLoaded,
 }) => {
   const [products, setProducts] = useState([]);
   const [productFeedbacks, setProductFeedbacks] = useState({});
@@ -18,13 +19,17 @@ const WomenProduct = ({
         const response = await fetch(`${API_BASE_URL}/allproducts`);
         const data = await response.json();
 
-        // Lọc sản phẩm có generalCategory là "Women"
         const womenProducts = data.filter(
           (product) => product.generalCategory === "Women"
         );
         setProducts(womenProducts);
 
-        // Lấy đánh giá cho tất cả sản phẩm nữ
+        // Extract unique detailedCategory values
+        const uniqueCategories = [...new Set(womenProducts.map(p => p.detailedCategory).filter(Boolean))];
+        if (onCategoriesLoaded) {
+          onCategoriesLoaded(uniqueCategories);
+        }
+
         const feedbacksPromises = womenProducts.map(async (product) => {
           const feedbackResponse = await fetch(
             `${API_BASE_URL}/get-feedbacks/${product.id}`
@@ -46,7 +51,7 @@ const WomenProduct = ({
     };
 
     fetchProducts();
-  }, []);
+  }, [onCategoriesLoaded]);
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch = searchTerm
@@ -58,9 +63,7 @@ const WomenProduct = ({
     const matchesDetailedCategory = detailedCategory
       ? product.detailedCategory === detailedCategory
       : true;
-    return (
-      matchesSearch && matchesCategory && matchesDetailedCategory
-    );
+    return matchesSearch && matchesCategory && matchesDetailedCategory;
   });
 
   const calculateAverageRating = (feedbacks) => {
@@ -77,24 +80,78 @@ const WomenProduct = ({
     } else if (sortOrder === "rating") {
       const aRating = calculateAverageRating(productFeedbacks[a.id]);
       const bRating = calculateAverageRating(productFeedbacks[b.id]);
-      return bRating - aRating; // Sắp xếp theo đánh giá
+      return bRating - aRating;
     }
     return 0;
   });
 
+  // Get featured products for carousel
+  const featuredProducts = [...products]
+    .sort((a, b) => {
+      const aRating = calculateAverageRating(productFeedbacks[a.id]);
+      const bRating = calculateAverageRating(productFeedbacks[b.id]);
+      return bRating - aRating;
+    })
+    .slice(0, 5);
+
   return (
-    <div className="product-grid">
-      {sortedProducts.map((product) => (
-        <Item
-          key={product.id}
-          id={product.id}
-          name={product.name}
-          image={product.image}
-          new_price={product.new_price}
-          old_price={product.old_price}
-          feedbacks={productFeedbacks[product.id]}
-        />
-      ))}
+    <div className="women-product-container">
+      {/* Horizontal Carousel - Featured */}
+      {featuredProducts.length > 0 && (
+        <div className="featured-carousel">
+          <div className="carousel-header">
+            <span className="carousel-title">Featured Picks</span>
+            <span className="carousel-subtitle">Curated for you</span>
+          </div>
+          <div className="carousel-track">
+            {featuredProducts.map((product) => (
+              <div key={product.id} className="carousel-item">
+                <FlipItem
+                  id={product.id}
+                  name={product.name}
+                  image={product.image}
+                  new_price={product.new_price}
+                  old_price={product.old_price}
+                  feedbacks={productFeedbacks[product.id]}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Products Header */}
+      <div className="products-header">
+        <span className="products-count">
+          Showing <span>{sortedProducts.length}</span> products
+        </span>
+      </div>
+
+      {/* Grid with alternating layout */}
+      <div className="products-grid">
+        {sortedProducts.map((product, index) => (
+          <div 
+            key={product.id} 
+            className={`product-item ${index % 5 === 0 ? 'featured' : ''}`}
+          >
+            <FlipItem
+              id={product.id}
+              name={product.name}
+              image={product.image}
+              new_price={product.new_price}
+              old_price={product.old_price}
+              feedbacks={productFeedbacks[product.id]}
+            />
+          </div>
+        ))}
+      </div>
+
+      {sortedProducts.length === 0 && (
+        <div className="no-products">
+          <span className="no-products-icon">✨</span>
+          <p>No products found</p>
+        </div>
+      )}
     </div>
   );
 };

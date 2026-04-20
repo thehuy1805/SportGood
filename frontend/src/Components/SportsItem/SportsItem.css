@@ -1,0 +1,241 @@
+.sports-item-card {
+  background: #12121f;
+  border-radius: 14px;
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.35s ease,
+              border-color 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  position: relative;
+  width: 100%;
+}
+
+.sports-item-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 48px rgba(6, 182, 212, 0.15);
+  border-color: rgba(6, 182, 212, 0.3);
+}
+
+.sports-item-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.sports-item-image-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 70%;
+  overflow: hidden;
+  background: #1a1a2e;
+}
+
+.sports-item-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.4s ease, transform 0.5s ease;
+}
+
+.sports-item-image.loaded {
+  opacity: 1;
+}
+
+.sports-item-card:hover .sports-item-image {
+  transform: scale(1.08);
+}
+
+.sports-item-skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    #1a1a2e 0%,
+    #252540 50%,
+    #1a1a2e 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.sports-item-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(6, 182, 212, 0.15) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.sports-item-card:hover .sports-item-overlay {
+  opacity: 1;
+}
+
+.sports-overlay-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: rgba(6, 182, 212, 0.9);
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sports-discount-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #f43f5e, #ec4899);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+}
+
+.sports-wishlist-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(18, 18, 31, 0.9);
+  backdrop-filter: blur(4px);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  opacity: 0;
+  transform: scale(0.7);
+}
+
+.sports-item-card:hover .sports-wishlist-btn {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.sports-wishlist-btn:hover {
+  background: rgba(6, 182, 212, 0.2);
+  color: #06b6d4;
+  transform: scale(1.1) !important;
+}
+
+.sports-wishlist-btn.active {
+  color: #06b6d4;
+  opacity: 1;
+  transform: scale(1);
+  background: rgba(6, 182, 212, 0.15);
+}
+
+.sports-wishlist-btn.animating {
+  animation: wishlistPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes wishlistPop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.4); }
+  70% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+.sports-item-details {
+  padding: 16px;
+}
+
+.sports-item-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e2e8f0;
+  line-height: 1.4;
+  margin: 0 0 12px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.sports-item-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sports-item-prices {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.sports-item-price-new {
+  font-size: 18px;
+  font-weight: 700;
+  color: #06b6d4;
+  text-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
+}
+
+.sports-item-price-old {
+  font-size: 13px;
+  color: rgba(148, 163, 184, 0.5);
+  text-decoration: line-through;
+}
+
+.sports-item-rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sports-item-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.star-svg {
+  width: 12px;
+  height: 12px;
+}
+
+.sports-item-review-count {
+  font-size: 11px;
+  color: rgba(148, 163, 184, 0.6);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .sports-item-image-wrapper {
+    padding-top: 75%;
+  }
+}
+
+@media (max-width: 900px) {
+  .sports-item-name {
+    font-size: 13px;
+  }
+
+  .sports-item-price-new {
+    font-size: 16px;
+  }
+}

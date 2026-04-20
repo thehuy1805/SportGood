@@ -1,0 +1,218 @@
+.men-product-container {
+    width: 100%;
+}
+
+/* ===== TOP PICKS - HORIZONTAL SCROLL ===== */
+.top-picks-section {
+    margin-bottom: 40px;
+}
+
+.top-picks-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.top-picks-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.top-picks-title::before {
+    content: '';
+    width: 20px;
+    height: 2px;
+    background: linear-gradient(90deg, #00f5ff, transparent);
+}
+
+.top-picks-nav {
+    display: flex;
+    gap: 8px;
+}
+
+.nav-btn {
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.nav-btn:hover {
+    background: rgba(0, 245, 255, 0.1);
+    border-color: #00f5ff;
+    color: #00f5ff;
+}
+
+.top-picks-scroll {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding-bottom: 8px;
+}
+
+.top-picks-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.top-pick-item {
+    flex-shrink: 0;
+    width: 200px;
+    scroll-snap-align: start;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.top-pick-item:hover {
+    border-color: #00f5ff;
+    transform: translateY(-6px);
+    box-shadow: 0 15px 40px rgba(0, 245, 255, 0.15);
+}
+
+.top-pick-image {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.top-pick-info {
+    padding: 14px;
+}
+
+.top-pick-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.top-pick-price {
+    font-size: 15px;
+    font-weight: 700;
+    color: #00f5ff;
+    text-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
+}
+
+/* ===== PRODUCTS HEADER ===== */
+.products-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.products-count {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.products-count span {
+    color: #00f5ff;
+    font-weight: 600;
+}
+
+/* ===== MASONRY GRID ===== */
+.masonry-grid {
+    columns: 3;
+    column-gap: 20px;
+}
+
+.masonry-item {
+    break-inside: avoid;
+    margin-bottom: 20px;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.masonry-item:hover {
+    transform: scale(1.02);
+    z-index: 10;
+    position: relative;
+}
+
+/* Explode effect on hover */
+.masonry-item:nth-child(3n+1):hover {
+    transform: scale(1.03) translateY(-5px);
+}
+
+.masonry-item:nth-child(3n+2):hover {
+    transform: scale(1.02) translateY(-3px);
+}
+
+.masonry-item:nth-child(3n+3):hover {
+    transform: scale(1.04) translateY(-8px);
+}
+
+/* ===== NO PRODUCTS ===== */
+.no-products {
+    text-align: center;
+    padding: 80px 20px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.no-products-icon {
+    font-size: 48px;
+    display: block;
+    margin-bottom: 16px;
+}
+
+.no-products p {
+    font-size: 16px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1200px) {
+    .masonry-grid {
+        columns: 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .masonry-grid {
+        columns: 2;
+        column-gap: 12px;
+    }
+
+    .masonry-item {
+        margin-bottom: 12px;
+    }
+
+    .top-pick-item {
+        width: 160px;
+    }
+
+    .top-pick-image {
+        height: 110px;
+    }
+}
+
+@media (max-width: 500px) {
+    .masonry-grid {
+        columns: 1;
+    }
+}

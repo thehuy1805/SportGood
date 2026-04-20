@@ -1,0 +1,185 @@
+/* ============================================================
+   SHOP PRODUCT GRID — Full-width Product Grid
+   ============================================================ */
+
+.shop-grid-wrapper {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 24px 0;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.shop-grid-wrapper.grid-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ===== Grid Header ===== */
+.shop-grid-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.shop-grid-count {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.shop-grid-count strong {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+/* View Toggle */
+.view-toggle {
+    display: flex;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 4px;
+}
+
+.view-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.view-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.view-btn.active {
+    background: rgba(240, 83, 83, 0.15);
+    color: #f05353;
+}
+
+/* ===== Grid ===== */
+.shop-grid {
+    display: grid;
+    gap: 20px;
+}
+
+.shop-grid.grid-grid-mode {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.shop-grid.grid-list-mode {
+    grid-template-columns: 1fr;
+}
+
+/* Masonry mode — 3 columns of varying height */
+.shop-grid.grid-masonry-mode {
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 0; /* Reset auto rows */
+}
+
+.shop-grid-item {
+    animation: gridItemFadeIn 0.5s ease both;
+}
+
+@keyframes gridItemFadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Masonry item — auto height based on content */
+.shop-grid-item.masonry-item {
+    height: auto;
+    break-inside: avoid;
+}
+
+/* ===== Empty State ===== */
+.shop-grid-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    text-align: center;
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.25);
+    margin-bottom: 20px;
+}
+
+.shop-grid-empty h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 8px;
+}
+
+.shop-grid-empty p {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.4);
+    margin: 0;
+    max-width: 300px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1280px) {
+    .shop-grid.grid-grid-mode {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .shop-grid.grid-masonry-mode {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .shop-grid.grid-grid-mode {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .shop-grid-wrapper {
+        padding: 24px 16px 0;
+    }
+
+    .shop-grid.grid-grid-mode {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+    }
+
+    .shop-grid.grid-masonry-mode {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+    }
+}
+
+@media (max-width: 500px) {
+    .shop-grid.grid-grid-mode,
+    .shop-grid.grid-masonry-mode {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+}

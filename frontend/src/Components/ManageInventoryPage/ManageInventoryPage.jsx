@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import axios from 'axios';
 import './ManageInventoryPage.css';
 import { ShopContext } from '../../Context/ShopContext';
@@ -57,7 +57,7 @@ const ManageInventoryPage = () => {
   }, [products, filterCategory, searchTerm, currentPage]);
 
   const updateStock = async (id, newStock, newSizeStatus) => {
-    if (newStock !== undefined && (isNaN(newStock) || newStock < 0)) {
+    if (newStock !== undefined && (isNaN(Number(newStock)) || Number(newStock) < 0)) {
       toast.warn('Please enter a valid quantity (0 or greater)');
       return;
     }
@@ -224,17 +224,26 @@ const InventoryCard = ({ product, sizes, isSportsEquipment, updateStock }) => {
     return existing ? { ...existing } : { status: 'available', remainingQuantity: null };
   });
 
+  // Use a ref to track which product.id we've already initialized for
+  // This prevents the useEffect from resetting local state on every parent re-render
+  // (objects in deps create new references on every render, triggering the effect)
+  const initializedRef = useRef(null);
+
   useEffect(() => {
-    const initSe = {};
-    sizes.forEach(s => {
-      const existing = product.sizeStatus?.[s];
-      initSe[s] = existing ? { ...existing } : { status: 'available', remainingQuantity: null };
-    });
-    setLocalSizeStatus(initSe);
-    const existingSe = product.sizeStatus?.['__se__'];
-    setLocalSeStatus(existingSe ? { ...existingSe } : { status: 'available', remainingQuantity: null });
-    setLocalStock(product.stock || 0);
-  }, [product.id]);
+    // Only reset when we see a NEW product.id (switching between different products)
+    if (initializedRef.current !== product.id) {
+      const initSe = {};
+      sizes.forEach(s => {
+        const existing = product.sizeStatus?.[s];
+        initSe[s] = existing ? { ...existing } : { status: 'available', remainingQuantity: null };
+      });
+      setLocalSizeStatus(initSe);
+      const existingSe = product.sizeStatus?.['__se__'];
+      setLocalSeStatus(existingSe ? { ...existingSe } : { status: 'available', remainingQuantity: null });
+      setLocalStock(product.stock || 0);
+      initializedRef.current = product.id;
+    }
+  }, [product.id, sizes]);
 
   const handleSizeStatusChange = (size, status) => {
     setLocalSizeStatus(prev => ({
@@ -268,6 +277,20 @@ const InventoryCard = ({ product, sizes, isSportsEquipment, updateStock }) => {
   };
 
   const handleUpdate = () => {
+    // Validate: few_left must have remainingQuantity > 0
+    const hasLowStockWithoutQty = Object.values(localSizeStatus).some(
+      entry => entry.status === 'low_stock' && (entry.remainingQuantity == null || entry.remainingQuantity <= 0)
+    );
+    if (isSportsEquipment && localSeStatus.status === 'low_stock' &&
+        (localSeStatus.remainingQuantity == null || localSeStatus.remainingQuantity <= 0)) {
+      toast.warn('Please enter a valid quantity for "Few left" status.');
+      return;
+    }
+    if (hasLowStockWithoutQty) {
+      toast.warn('Please enter a valid quantity for each size with "Few left" status.');
+      return;
+    }
+
     if (isSportsEquipment) {
       updateStock(product.id, localStock, buildSizeStatus());
     } else {

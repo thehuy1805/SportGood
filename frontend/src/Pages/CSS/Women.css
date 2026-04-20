@@ -1,172 +1,204 @@
 /* ============================================================
-   WOMEN PAGE — Premium Dark Sidebar Design
+   WOMEN PAGE — Empower & Flow Layout
+   Soft luxury, elegant, athletic
    ============================================================ */
 
 .women-container {
   display: flex;
   flex-direction: column;
-}
-
-.women-banner {
-  max-width: 100%;
-  height: auto;
-  display: contents;
+  background: #faf9f7;
+  min-height: 100vh;
 }
 
 .women-content {
   display: flex;
-  margin-top: 24px;
-  min-height: calc(100vh - 200px);
-}
-
-/* ---------- Sidebar ---------- */
-.sidebar-women {
-  width: 280px;
-  min-width: 280px;
-  margin-right: 24px;
-  background: var(--nav-bg);
-  border-radius: 16px;
-  padding: 20px 16px;
-  border: 1px solid var(--nav-border);
-  display: flex;
   flex-direction: column;
-  gap: 6px;
-  position: sticky;
-  top: 88px;
-  align-self: flex-start;
-  max-height: calc(100vh - 110px);
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(249, 115, 22, 0.3) transparent;
+  padding: 40px 0;
 }
 
-.sidebar-women::-webkit-scrollbar {
-  width: 4px;
+/* ===== TOP FILTER BAR ===== */
+.women-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  margin-bottom: 32px;
+  gap: 24px;
+  flex-wrap: wrap;
 }
 
-.sidebar-women::-webkit-scrollbar-track {
+.filter-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-tab {
+  padding: 12px 24px;
   background: transparent;
-}
-
-.sidebar-women::-webkit-scrollbar-thumb {
-  background: rgba(249, 115, 22, 0.3);
-  border-radius: 4px;
-}
-
-/* ---------- Section Card ---------- */
-.sidebar-section {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
-  padding: 14px 16px;
-  transition: border-color 0.25s ease;
-}
-
-.sidebar-section:hover {
-  border-color: rgba(249, 115, 22, 0.2);
-}
-
-/* ---------- Section Header ---------- */
-.sidebar-section-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.sidebar-section-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: rgba(249, 115, 22, 0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--nav-accent);
-  flex-shrink: 0;
-  transition: background 0.25s ease;
-}
-
-.sidebar-section:hover .sidebar-section-icon {
-  background: rgba(249, 115, 22, 0.2);
-}
-
-.sidebar-section-title {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 100px;
   font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  color: #e2e8f0;
-  text-transform: uppercase;
-  flex: 1;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.25s ease;
 }
 
-.sidebar-section-arrow {
-  color: var(--nav-text-muted);
-  transition: transform 0.25s ease, color 0.25s ease;
+.filter-tab:hover {
+  border-color: #ec4899;
+  color: #ec4899;
+}
+
+.filter-tab.active {
+  background: linear-gradient(135deg, #ec4899, #f43f5e);
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 4px 20px rgba(236, 72, 153, 0.3);
+}
+
+.filter-right {
   display: flex;
   align-items: center;
+  gap: 16px;
 }
 
-.sidebar-section.collapsed .sidebar-section-arrow {
-  transform: rotate(-90deg);
-  color: var(--nav-accent);
+.filter-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-/* ---------- Section Body ---------- */
-.sidebar-section-body {
-  overflow: hidden;
-  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
-  max-height: 400px;
-  opacity: 1;
+.filter-sort-label {
+  font-size: 12px;
+  color: #9ca3af;
 }
 
-.sidebar-section.collapsed .sidebar-section-body {
-  max-height: 0;
-  opacity: 0;
+.filter-sort-select {
+  padding: 10px 16px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  font-size: 13px;
+  color: #1f2937;
+  cursor: pointer;
 }
 
-/* ---------- Main Content ---------- */
-.main-content {
-  flex: 1;
-  min-width: 0;
+.filter-search {
+  position: relative;
 }
 
-/* ---------- Responsive ---------- */
-@media (max-width: 900px) {
-  .women-content {
+.filter-search-input {
+  padding: 10px 16px 10px 40px;
+  width: 200px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  font-size: 13px;
+  color: #1f2937;
+}
+
+.filter-search-input:focus {
+  outline: none;
+  border-color: #ec4899;
+}
+
+.filter-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+}
+
+/* Filter Dropdown */
+.filter-dropdown-trigger {
+  padding: 10px 16px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  font-size: 13px;
+  color: #1f2937;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.filter-dropdown-trigger:hover {
+  border-color: #ec4899;
+}
+
+/* ===== MAIN CONTENT ===== */
+.women-main {
+  padding: 0 40px;
+}
+
+/* Products Header */
+.products-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.products-count {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.products-count span {
+  color: #ec4899;
+  font-weight: 600;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .women-filter-bar {
+    padding: 0 24px;
+  }
+
+  .women-main {
+    padding: 0 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .women-filter-bar {
     flex-direction: column;
+    align-items: stretch;
+    padding: 0 16px;
   }
 
-  .sidebar-women {
-    width: 100%;
-    min-width: unset;
-    margin-right: 0;
-    position: static;
-    max-height: none;
-    flex-direction: row;
+  .filter-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+  }
+
+  .filter-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-tab {
+    flex-shrink: 0;
+    padding: 10px 18px;
+    font-size: 12px;
+  }
+
+  .filter-right {
     flex-wrap: wrap;
-    gap: 8px;
-    padding: 14px;
   }
 
-  .sidebar-section {
-    flex: 1 1 calc(50% - 4px);
-    min-width: 200px;
+  .filter-search-input {
+    width: 100%;
   }
 
-  .sidebar-section-body {
-    max-height: 300px;
-  }
-}
-
-@media (max-width: 500px) {
-  .sidebar-women {
-    padding: 10px;
-    gap: 6px;
-  }
-
-  .sidebar-section {
-    flex: 1 1 100%;
+  .women-main {
+    padding: 0 16px;
   }
 }

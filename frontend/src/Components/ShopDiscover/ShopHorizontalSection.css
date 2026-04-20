@@ -1,0 +1,175 @@
+/* ============================================================
+   SHOP HORIZONTAL SECTION — Scrollable Product Rows
+   ============================================================ */
+
+.shop-hs {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 24px 0;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.shop-hs.shop-hs-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ===== Header ===== */
+.shop-hs-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.shop-hs-title-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.shop-hs-icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--section-gradient);
+    border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+.shop-hs-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+    letter-spacing: -0.3px;
+}
+
+.shop-hs-subtitle {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+    margin: 2px 0 0;
+    font-weight: 400;
+}
+
+.shop-hs-view-all {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 20px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.shop-hs-view-all:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+}
+
+/* ===== Scroll Container ===== */
+.shop-hs-scroll {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    cursor: grab;
+    padding-bottom: 12px;
+}
+
+.shop-hs-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.shop-hs-scroll:active {
+    cursor: grabbing;
+}
+
+/* Fade edges */
+.shop-hs-scroll::before,
+.shop-hs-scroll::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 12px;
+    width: 48px;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.shop-hs-scroll {
+    position: relative;
+}
+
+.shop-hs-scroll::before {
+    left: 0;
+    background: linear-gradient(to right, #0a0a0a 0%, transparent 100%);
+}
+
+.shop-hs-scroll::after {
+    right: 0;
+    background: linear-gradient(to left, #0a0a0a 0%, transparent 100%);
+}
+
+/* ===== Track ===== */
+.shop-hs-track {
+    display: flex;
+    gap: 20px;
+    padding: 4px 4px;
+    min-width: max-content;
+}
+
+/* ===== Item Card ===== */
+.shop-hs-item {
+    width: 260px;
+    flex-shrink: 0;
+    animation: itemFadeIn 0.5s ease both;
+}
+
+@keyframes itemFadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+    .shop-hs {
+        padding: 32px 16px 0;
+    }
+
+    .shop-hs-title {
+        font-size: 18px;
+    }
+
+    .shop-hs-header {
+        margin-bottom: 18px;
+    }
+
+    .shop-hs-item {
+        width: 220px;
+    }
+
+    .shop-hs-track {
+        gap: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .shop-hs-item {
+        width: 200px;
+    }
+}

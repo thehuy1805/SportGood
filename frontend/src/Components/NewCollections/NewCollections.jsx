@@ -3,12 +3,13 @@ import './NewCollections.css'
 import Item from '../Item/Item'
 import {useState} from 'react'
 import {useEffect} from 'react'
+import { useNavigate } from 'react-router-dom'
 import API_BASE_URL from '../../config'
 
 const NewCollections = () => {
-
 const [new_collection,setNew_collection] = useState([]);
 const [productFeedbacks, setProductFeedbacks] = useState({});
+const navigate = useNavigate();
 
 useEffect(() => {
   const fetchData = async () => {
@@ -39,7 +40,7 @@ useEffect(() => {
 }, []);
 
 return (
-  <div className='nc-outer'>
+    <div id="new-arrivals-section" className='nc-outer'>
     <div className='nc-header'>
       <div className='nc-number'>02</div>
       <div className='nc-header-text'>
@@ -59,12 +60,15 @@ return (
           new_price={item.new_price}
           old_price={item.old_price}
           feedbacks={productFeedbacks[item.id]}
+          generalCategory={item.generalCategory}
+          detailedCategory={item.detailedCategory}
+          sizeStatus={item.sizeStatus}
         />
       ))}
     </div>
 
     <div className='nc-footer'>
-      <button className='nc-btn'>
+      <button className='nc-btn' onClick={() => navigate('/shop')}>
         View All New Arrivals
         <span className='nc-btn-arrow'>→</span>
       </button>

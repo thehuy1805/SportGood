@@ -1,0 +1,289 @@
+/* ============================================================
+   MEN SIDEBAR — Compact Filters
+   ============================================================ */
+
+.men-sidebar {
+    width: 100%;
+    padding-right: 0;
+}
+
+/* Header */
+.men-sidebar .sidebar-header {
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.men-sidebar .sidebar-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* Filter Section */
+.men-sidebar .filter-section {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.men-sidebar .filter-section:last-of-type {
+    border-bottom: none;
+}
+
+.men-sidebar .filter-section-header {
+    margin-bottom: 8px;
+}
+
+.men-sidebar .filter-section-title {
+    font-size: 10px;
+    font-weight: 600;
+    color: #e2e8f0;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.men-sidebar .filter-section-body {
+    /* Always visible */
+}
+
+/* Search Input */
+.men-sidebar .search-input-wrapper {
+    position: relative;
+    margin-bottom: 4px;
+}
+
+.men-sidebar .search-icon {
+    position: absolute;
+    left: 7px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.3);
+    width: 12px;
+    height: 12px;
+}
+
+.men-sidebar .search-input {
+    width: 100%;
+    padding: 6px 6px 6px 26px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    color: #ffffff;
+    font-size: 11px;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.men-sidebar .search-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 10px;
+}
+
+.men-sidebar .search-input:focus {
+    outline: none;
+    border-color: #00f5ff;
+    background: rgba(0, 245, 255, 0.05);
+}
+
+/* Filter List */
+.men-sidebar .filter-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.men-sidebar .filter-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 8px;
+    background: transparent;
+    border: none;
+    border-radius: 5px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    width: 100%;
+}
+
+.men-sidebar .filter-item:hover {
+    background: rgba(0, 245, 255, 0.08);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.men-sidebar .filter-item.active {
+    background: rgba(0, 245, 255, 0.12);
+    color: #00f5ff;
+}
+
+.men-sidebar .filter-item span:first-child {
+    flex: 1;
+}
+
+.men-sidebar .chip-count {
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.06);
+    padding: 2px 5px;
+    border-radius: 10px;
+}
+
+.men-sidebar .filter-item.active .chip-count {
+    background: rgba(0, 245, 255, 0.15);
+    color: rgba(0, 245, 255, 0.8);
+}
+
+.men-sidebar .no-categories {
+    padding: 12px 0;
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.men-sidebar .loading-text {
+    padding: 12px 0;
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* Price Inputs */
+.men-sidebar .price-inputs {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.men-sidebar .price-input {
+    flex: 1;
+    min-width: 0;
+    padding: 5px 4px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 5px;
+    color: #ffffff;
+    font-size: 11px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.men-sidebar .price-input:focus {
+    outline: none;
+    border-color: #00f5ff;
+}
+
+.men-sidebar .price-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 10px;
+}
+
+.men-sidebar .price-divider {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 11px;
+    flex-shrink: 0;
+}
+
+.men-sidebar .apply-price-btn {
+    padding: 5px 8px;
+    background: rgba(0, 245, 255, 0.1);
+    border: 1px solid rgba(0, 245, 255, 0.3);
+    border-radius: 5px;
+    color: #00f5ff;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.men-sidebar .apply-price-btn:hover {
+    background: rgba(0, 245, 255, 0.2);
+}
+
+/* Sort Options */
+.men-sidebar .sort-options {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.men-sidebar .sort-option {
+    padding: 6px 8px;
+    background: transparent;
+    border: none;
+    border-radius: 5px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    width: 100%;
+}
+
+.men-sidebar .sort-option:hover {
+    background: rgba(0, 245, 255, 0.08);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.men-sidebar .sort-option.active {
+    background: rgba(0, 245, 255, 0.12);
+    color: #00f5ff;
+}
+
+/* Reset Button */
+.men-sidebar .filter-reset-btn {
+    width: 100%;
+    padding: 8px;
+    margin-top: 8px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 5px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.men-sidebar .filter-reset-btn:hover {
+    border-color: #ff6600;
+    color: #ff6600;
+    background: rgba(255, 102, 0, 0.05);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .men-sidebar {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        padding-right: 0;
+    }
+
+    .men-sidebar .sidebar-header {
+        grid-column: 1 / -1;
+        margin-bottom: 0;
+        padding-bottom: 10px;
+    }
+
+    .men-sidebar .filter-section {
+        margin-bottom: 0;
+        padding-bottom: 10px;
+    }
+
+    .men-sidebar .filter-reset-btn {
+        grid-column: 1 / -1;
+        margin-top: 0;
+    }
+}
+
+@media (max-width: 500px) {
+    .men-sidebar {
+        grid-template-columns: 1fr;
+    }
+}

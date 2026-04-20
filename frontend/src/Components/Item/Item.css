@@ -1,5 +1,5 @@
 /* ============================================================
-   ITEM CARD — Dark Premium Sports Store Design
+   ITEM CARD — Enhanced Dark Premium Sports Store Design
    ============================================================ */
 
 .item-card {
@@ -123,16 +123,27 @@
   transform: translateX(0);
 }
 
-/* ---------- Discount Badge ---------- */
-.item-discount-badge {
+/* ---------- Badges ---------- */
+.item-badges {
   position: absolute;
-  top: 12px;
-  left: 12px;
-  background: #f97316;
-  border-radius: 8px;
-  padding: 4px 8px;
-  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
+  top: 10px;
+  left: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   z-index: 2;
+}
+
+.item-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   animation: badgeSlideIn 0.3s ease;
 }
 
@@ -141,12 +152,177 @@
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.item-discount-value {
+.badge-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.8); }
+}
+
+/* Hot deal badge */
+.item-badge-hot {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(249, 115, 22, 0.4);
+}
+
+.item-badge-hot .badge-dot {
+  background: #fff;
+}
+
+/* New badge */
+.item-badge-new {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(16, 185, 129, 0.4);
+}
+
+.item-badge-new .badge-dot {
+  background: #fff;
+}
+
+/* Trending badge */
+.item-badge-trending {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(139, 92, 246, 0.4);
+}
+
+.item-badge-trending .badge-dot {
+  background: #fff;
+}
+
+/* ---------- Wishlist Button ---------- */
+.item-wishlist-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(15, 23, 42, 0.85);
+  color: rgba(148, 163, 184, 0.7);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  backdrop-filter: blur(4px);
+  z-index: 3;
+  opacity: 0;
+  transform: scale(0.7);
+}
+
+.item-card:hover .item-wishlist-btn {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.item-wishlist-btn:hover {
+  background: rgba(249, 115, 22, 0.2);
+  color: #f97316;
+  transform: scale(1.15) !important;
+}
+
+.item-wishlist-btn.active {
+  color: #f97316;
+  opacity: 1;
+  transform: scale(1);
+  background: rgba(249, 115, 22, 0.15);
+}
+
+.item-wishlist-btn.active:hover {
+  background: rgba(249, 115, 22, 0.25);
+}
+
+.item-wishlist-btn.animating {
+  animation: wishlistPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes wishlistPop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.4); }
+  70% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+/* ---------- Quick Add to Cart ---------- */
+.item-quick-add {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.7) 60%, transparent 100%);
+  padding: 16px 12px 12px;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 4;
+}
+
+.item-card:hover .item-quick-add {
+  transform: translateY(0);
+}
+
+.item-quick-add-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 11px;
-  font-weight: 800;
-  color: #ffffff;
-  letter-spacing: 0.3px;
-  white-space: nowrap;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.item-size-selector {
+  display: flex;
+  gap: 6px;
+}
+
+.size-btn {
+  flex: 1;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.size-btn:hover,
+.size-btn.hovered {
+  background: rgba(240, 83, 83, 0.2);
+  border-color: rgba(240, 83, 83, 0.5);
+  color: #f05353;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(240, 83, 83, 0.2);
+}
+
+.size-btn.added {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.5);
+  color: #10b981;
+  transform: scale(0.95);
+}
+
+.size-btn.oos {
+  opacity: 0.35;
+  cursor: not-allowed;
+  text-decoration: line-through;
+  pointer-events: none;
 }
 
 /* ---------- Details ---------- */
@@ -154,7 +330,7 @@
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   flex: 1;
   min-height: 0;
   background: linear-gradient(180deg, rgba(30, 41, 59, 0.4) 0%, transparent 100%);
@@ -179,6 +355,21 @@
   color: #fb923c;
 }
 
+/* Category tag */
+.item-category-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(148, 163, 184, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 3px 8px;
+  border-radius: 4px;
+  width: fit-content;
+}
+
 .item-bottom {
   display: flex;
   flex-direction: column;
@@ -191,6 +382,7 @@
   display: flex;
   align-items: baseline;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .item-price-new {
@@ -208,6 +400,16 @@
   color: rgba(148, 163, 184, 0.5);
   text-decoration: line-through;
   letter-spacing: 0;
+}
+
+.item-price-save {
+  font-size: 11px;
+  font-weight: 700;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 
 /* ---------- Rating ---------- */
@@ -237,61 +439,6 @@
   font-size: 11px;
   color: rgba(148, 163, 184, 0.6);
   font-weight: 500;
-}
-
-/* ---------- Wishlist Button ---------- */
-.item-wishlist-btn {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
-    border: none;
-    background: rgba(15, 23, 42, 0.85);
-    color: rgba(148, 163, 184, 0.7);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-    backdrop-filter: blur(4px);
-    z-index: 3;
-    opacity: 0;
-    transform: scale(0.7);
-}
-
-.item-card:hover .item-wishlist-btn {
-    opacity: 1;
-    transform: scale(1);
-}
-
-.item-wishlist-btn:hover {
-    background: rgba(249, 115, 22, 0.2);
-    color: #f97316;
-    transform: scale(1.15) !important;
-}
-
-.item-wishlist-btn.active {
-    color: #f97316;
-    opacity: 1;
-    transform: scale(1);
-    background: rgba(249, 115, 22, 0.15);
-}
-
-.item-wishlist-btn.active:hover {
-    background: rgba(249, 115, 22, 0.25);
-}
-
-.item-wishlist-btn.animating {
-    animation: wishlistPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes wishlistPop {
-    0% { transform: scale(1); }
-    40% { transform: scale(1.4); }
-    70% { transform: scale(0.9); }
-    100% { transform: scale(1); }
 }
 
 /* ---------- Responsive ---------- */
@@ -333,6 +480,11 @@
   .item-price-new {
     font-size: 16px;
   }
+
+  /* Hide quick add on smaller screens */
+  .item-quick-add {
+    display: none;
+  }
 }
 
 @media (max-width: 500px) {
@@ -341,5 +493,9 @@
   }
   .item-overlay-text {
     font-size: 11px;
+  }
+
+  .item-price-save {
+    display: none;
   }
 }

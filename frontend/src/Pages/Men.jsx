@@ -1,17 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 import MenProduct from '../Components/MenProduct/MenProduct'; 
-import KeywordSearch from '../Components/KeywordSearch/KeywordSearch';
-import SortByPrice from '../Components/SortByPrice/SortByPrice';
-import ProductCategory from '../Components/ProductCategory/ProductCategory';
+import MenSidebar from '../Components/MenSidebar/MenSidebar';
+import MenHero from '../Components/MenHero/MenHero';
+import CategoryFeatures from '../Components/CategoryFeatures/CategoryFeatures';
+import CategoryCollections from '../Components/CategoryCollections/CategoryCollections';
+import CategoryPromo from '../Components/CategoryPromo/CategoryPromo';
+import AthletesChoice from '../Components/AthletesChoice/AthletesChoice';
 
 import './CSS/Men.css';
-import men_banner from '../Components/Assets/men_banner.png';
 
 export const Men = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [sortOrder, setSortOrder] = useState('rating');
     const [detailedCategory, setDetailedCategory] = useState(''); 
+    const [priceRange, setPriceRange] = useState({ min: '', max: '' });
     const pagePositionRef = useRef(null);
 
     const handleSearch = (term) => {
@@ -24,7 +27,19 @@ export const Men = () => {
 
     const handleReset = () => {
         setSortOrder('rating');
-        setDetailedCategory(''); 
+        setDetailedCategory('');
+        setSearchTerm('');
+        setPriceRange({ min: '', max: '' });
+    };
+
+    const handleCollectionSelect = (collectionName) => {
+        setDetailedCategory(collectionName);
+        setTimeout(() => {
+            const productsSection = document.getElementById('products');
+            if (productsSection) {
+                productsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 100);
     };
 
     useEffect(() => {
@@ -39,30 +54,31 @@ export const Men = () => {
 
     return (
         <div className="men-container">
-            <div className="men-banner">
-                <img src={men_banner} alt="Banner" />
-            </div>
-            <div className="men-content">
+            <MenHero />
+            <CategoryFeatures category="Men" />
+            <CategoryCollections category="Men" onSelectCollection={handleCollectionSelect} />
+            <CategoryPromo category="Men" />
+            <AthletesChoice />
+            
+            <div className="men-content" id="products">
                 <div className="sidebar-men">
-                    <KeywordSearch onSearch={term => { handleBeforeChange(); handleSearch(term); }} />
-                    <SortByPrice 
-                        onSortChange={sortOption => { handleBeforeChange(); handleSortChange(sortOption); }} 
-                        onReset={handleReset}
-                        initialSortOrder="rating"
-                    />
-                    <ProductCategory 
-                        generalCategory="Men"
-                        onDetailedCategorySelect={category => { 
-                            handleBeforeChange(); 
-                            setDetailedCategory(category); 
-                        }} 
-                    />
+            <MenSidebar 
+                onSearch={term => { handleBeforeChange(); handleSearch(term); }}
+                onDetailedCategorySelect={category => { 
+                    handleBeforeChange(); 
+                    setDetailedCategory(category); 
+                }}
+                onReset={handleReset}
+                onPriceChange={setPriceRange}
+                onSortChange={handleSortChange}
+            />
                 </div>
                 <div className="main-content">
                     <MenProduct 
                         searchTerm={searchTerm} 
                         sortOrder={sortOrder} 
-                        detailedCategory={detailedCategory} 
+                        detailedCategory={detailedCategory}
+                        priceRange={priceRange}
                     />
                 </div>
             </div>

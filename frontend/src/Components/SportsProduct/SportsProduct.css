@@ -1,0 +1,247 @@
+.sports-product-container {
+    width: 100%;
+}
+
+/* ===== INTERACTIVE SHELF ===== */
+.interactive-shelf {
+    margin-bottom: 40px;
+}
+
+.shelf-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.shelf-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.shelf-title::before {
+    content: '';
+    width: 4px;
+    height: 20px;
+    background: linear-gradient(180deg, #06b6d4, #a855f7);
+    border-radius: 2px;
+}
+
+.shelf-nav {
+    display: flex;
+    gap: 8px;
+}
+
+.shelf-nav-btn {
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.shelf-nav-btn:hover {
+    background: rgba(6, 182, 212, 0.1);
+    border-color: #06b6d4;
+    color: #06b6d4;
+}
+
+.shelf-track {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding-bottom: 12px;
+}
+
+.shelf-track::-webkit-scrollbar {
+    display: none;
+}
+
+.shelf-group {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 20px;
+    min-width: 320px;
+    transition: all 0.3s ease;
+}
+
+.shelf-group:hover {
+    border-color: rgba(6, 182, 212, 0.3);
+    box-shadow: 0 10px 40px rgba(6, 182, 212, 0.1);
+}
+
+.shelf-group-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.shelf-group-icon {
+    font-size: 24px;
+}
+
+.shelf-group-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.shelf-group-count {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-left: auto;
+}
+
+.shelf-group-products {
+    display: flex;
+    gap: 12px;
+}
+
+.shelf-product {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.shelf-product:hover {
+    transform: scale(1.02);
+}
+
+.shelf-product-image {
+    width: 100%;
+    height: 90px;
+    object-fit: cover;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.shelf-product-info {
+    padding: 10px;
+}
+
+.shelf-product-name {
+    font-size: 11px;
+    font-weight: 500;
+    color: #e2e8f0;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.shelf-product-price {
+    font-size: 13px;
+    font-weight: 700;
+    color: #06b6d4;
+}
+
+/* ===== PRODUCTS HEADER ===== */
+.products-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    margin-bottom: 24px;
+}
+
+.products-count {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.products-count span {
+    color: #06b6d4;
+    font-weight: 600;
+}
+
+/* ===== PRODUCTS GRID ===== */
+.sports-products-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    padding: 0 40px;
+}
+
+.sports-product-item {
+    transition: transform 0.3s ease;
+}
+
+.sports-product-item:hover {
+    transform: translateY(-4px);
+}
+
+/* ===== NO PRODUCTS ===== */
+.no-products {
+    text-align: center;
+    padding: 80px 20px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.no-products-icon {
+    font-size: 48px;
+    display: block;
+    margin-bottom: 16px;
+}
+
+.no-products p {
+    font-size: 16px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1200px) {
+    .sports-products-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .shelf-group {
+        min-width: 280px;
+    }
+
+    .products-header,
+    .sports-products-grid {
+        padding: 0 20px;
+    }
+
+    .sports-products-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+}
+
+@media (max-width: 600px) {
+    .shelf-group {
+        min-width: 260px;
+    }
+
+    .shelf-product-image {
+        height: 70px;
+    }
+
+    .sports-products-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+}

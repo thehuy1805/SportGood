@@ -2,12 +2,13 @@ import React from 'react'
 import './Popular.css'
 import Item from '../Item/Item'
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import API_BASE_URL from '../../config'
 
 const Popular = () => {
-
   const [popularProducts, setPopularProducts] = useState([]);
   const [productFeedbacks, setProductFeedbacks] = useState({});
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,7 +39,7 @@ const Popular = () => {
   }, []);
 
   return (
-    <div className='pop-outer'>
+    <div id="popular-section" className='pop-outer'>
       <div className='pop-header'>
         <div className='pop-number'>01</div>
         <div className='pop-header-left'>
@@ -62,9 +63,25 @@ const Popular = () => {
               new_price={item.new_price}
               old_price={item.old_price}
               feedbacks={productFeedbacks[item.id]}
+              generalCategory={item.generalCategory}
+              detailedCategory={item.detailedCategory}
+              sizeStatus={item.sizeStatus}
             />
           );
         })}
+      </div>
+
+      <div className="pop-footer">
+        <button className="pop-btn" onClick={() => {
+          const section = document.getElementById('new-arrivals-section');
+          if (section) {
+            const offset = section.getBoundingClientRect().top + window.scrollY - 80;
+            window.scrollTo({ top: offset, behavior: 'smooth' });
+          }
+        }}>
+          Browse Collections
+          <span className="pop-btn-arrow">→</span>
+        </button>
       </div>
     </div>
   )

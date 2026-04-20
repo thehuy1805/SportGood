@@ -8,10 +8,10 @@ import shoes_banner from '../Assets/shoes_banner.png';
 import basketball_banner from '../Assets/basketball_banner.png';
 
 const categoryCards = [
-  { id: 1, image: sportwear_banner, label: 'Sportwear', tag: 'New Arrivals' },
-  { id: 2, image: gym_banner, label: 'Gym & Fitness', tag: 'Hot Items' },
-  { id: 3, image: shoes_banner, label: 'Soccer Shoes', tag: 'Best Seller' },
-  { id: 4, image: basketball_banner, label: 'Basketball', tag: 'Trending' },
+  { id: 1, image: sportwear_banner, label: 'Sportwear', tag: 'New Arrivals', path: '/sportswear/gym-sets' },
+  { id: 2, image: gym_banner, label: 'Gym & Fitness', tag: 'Hot Items', path: '/sportswear/gym-sets' },
+  { id: 3, image: shoes_banner, label: 'Soccer Shoes', tag: 'Best Seller', path: '/sports-shoes/soccer-shoes' },
+  { id: 4, image: basketball_banner, label: 'Basketball', tag: 'Trending', path: '/sport-equipment' },
 ];
 
 const Hero = () => {
@@ -24,8 +24,8 @@ const Hero = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleExplore = (category) => {
-    navigate(`/shop`);
+  const handleExplore = (path) => {
+    navigate(path);
   };
 
   const handleShopNowClick = () => {
@@ -85,7 +85,7 @@ const Hero = () => {
               className={`category-card ${activeCard === card.id ? 'card-active' : ''}`}
               onMouseEnter={() => setActiveCard(card.id)}
               onMouseLeave={() => setActiveCard(null)}
-              onClick={() => handleExplore(card.label)}
+              onClick={() => handleExplore(card.path)}
             >
               <div className="card-image-wrapper">
                 <img src={card.image} alt={card.label} className="card-image" />

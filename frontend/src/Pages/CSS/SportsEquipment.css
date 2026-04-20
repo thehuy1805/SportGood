@@ -1,172 +1,431 @@
 /* ============================================================
-   SPORTS EQUIPMENT PAGE — Premium Dark Sidebar Design
+   SPORTS EQUIPMENT PAGE — Energy Hub Layout
+   Electric, energetic, gym vibe
    ============================================================ */
 
 .sportsEquipment-container {
   display: flex;
   flex-direction: column;
-}
-
-.sportsEquipment-banner {
-  max-width: 100%;
-  height: auto;
-  display: contents;
+  background: #0a0a14;
+  min-height: 100vh;
 }
 
 .sportsEquipment-content {
   display: flex;
-  margin-top: 24px;
-  min-height: calc(100vh - 200px);
-}
-
-/* ---------- Sidebar ---------- */
-.sidebar-sportsEquipment {
-  width: 280px;
-  min-width: 280px;
-  margin-right: 24px;
-  background: var(--nav-bg);
-  border-radius: 16px;
-  padding: 20px 16px;
-  border: 1px solid var(--nav-border);
-  display: flex;
   flex-direction: column;
-  gap: 6px;
-  position: sticky;
-  top: 88px;
-  align-self: flex-start;
-  max-height: calc(100vh - 110px);
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(249, 115, 22, 0.3) transparent;
+  padding: 40px 0;
 }
 
-.sidebar-sportsEquipment::-webkit-scrollbar {
-  width: 4px;
+/* ===== TAB NAVIGATION ===== */
+.sports-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 40px;
+  margin-bottom: 32px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.sidebar-sportsEquipment::-webkit-scrollbar-track {
+.sports-tab {
+  padding: 16px 28px;
   background: transparent;
-}
-
-.sidebar-sportsEquipment::-webkit-scrollbar-thumb {
-  background: rgba(249, 115, 22, 0.3);
-  border-radius: 4px;
-}
-
-/* ---------- Section Card ---------- */
-.sidebar-section {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
-  padding: 14px 16px;
-  transition: border-color 0.25s ease;
-}
-
-.sidebar-section:hover {
-  border-color: rgba(249, 115, 22, 0.2);
-}
-
-/* ---------- Section Header ---------- */
-.sidebar-section-header {
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
-  cursor: pointer;
-  user-select: none;
 }
 
-.sidebar-section-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: rgba(249, 115, 22, 0.12);
+.sports-tab-icon {
+  font-size: 18px;
+}
+
+.sports-tab:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.sports-tab.active {
+  color: #06b6d4;
+  border-bottom-color: #06b6d4;
+}
+
+.sports-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #06b6d4, #a855f7);
+}
+
+/* ===== FILTER CHIPS BAR ===== */
+.filter-chips-bar {
+  display: flex;
+  gap: 8px;
+  padding: 0 40px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.filter-chips-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-chip-bar {
+  flex-shrink: 0;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-chip-bar:hover {
+  background: rgba(6, 182, 212, 0.1);
+  border-color: rgba(6, 182, 212, 0.3);
+  color: #06b6d4;
+}
+
+.filter-chip-bar.active {
+  background: rgba(6, 182, 212, 0.15);
+  border-color: #06b6d4;
+  color: #06b6d4;
+}
+
+/* ===== INTERACTIVE SHELF ===== */
+.interactive-shelf {
+  margin-bottom: 40px;
+  padding: 0 40px;
+}
+
+.shelf-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.shelf-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.shelf-title::before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: linear-gradient(180deg, #06b6d4, #a855f7);
+  border-radius: 2px;
+}
+
+.shelf-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.shelf-nav-btn {
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--nav-accent);
+  transition: all 0.2s ease;
+}
+
+.shelf-nav-btn:hover {
+  background: rgba(6, 182, 212, 0.1);
+  border-color: #06b6d4;
+  color: #06b6d4;
+}
+
+.shelf-track {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding-bottom: 12px;
+}
+
+.shelf-track::-webkit-scrollbar {
+  display: none;
+}
+
+.shelf-group {
   flex-shrink: 0;
-  transition: background 0.25s ease;
+  scroll-snap-align: start;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 20px;
+  min-width: 300px;
+  transition: all 0.3s ease;
 }
 
-.sidebar-section:hover .sidebar-section-icon {
-  background: rgba(249, 115, 22, 0.2);
+.shelf-group:hover {
+  border-color: rgba(6, 182, 212, 0.3);
+  box-shadow: 0 10px 40px rgba(6, 182, 212, 0.1);
 }
 
-.sidebar-section-title {
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  color: #e2e8f0;
-  text-transform: uppercase;
-  flex: 1;
-}
-
-.sidebar-section-arrow {
-  color: var(--nav-text-muted);
-  transition: transform 0.25s ease, color 0.25s ease;
+.shelf-group-header {
   display: flex;
   align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.sidebar-section.collapsed .sidebar-section-arrow {
-  transform: rotate(-90deg);
-  color: var(--nav-accent);
+.shelf-group-icon {
+  font-size: 24px;
 }
 
-/* ---------- Section Body ---------- */
-.sidebar-section-body {
-  overflow: hidden;
-  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
-  max-height: 400px;
-  opacity: 1;
+.shelf-group-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
 }
 
-.sidebar-section.collapsed .sidebar-section-body {
-  max-height: 0;
-  opacity: 0;
+.shelf-group-count {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-left: auto;
 }
 
-/* ---------- Main Content ---------- */
-.main-content {
+.shelf-group-products {
+  display: flex;
+  gap: 12px;
+}
+
+.shelf-product {
   flex: 1;
-  min-width: 0;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s ease;
+  cursor: pointer;
 }
 
-/* ---------- Responsive ---------- */
-@media (max-width: 900px) {
-  .sportsEquipment-content {
-    flex-direction: column;
-  }
+.shelf-product:hover {
+  transform: scale(1.02);
+}
 
-  .sidebar-sportsEquipment {
+.shelf-product-image {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.shelf-product-info {
+  padding: 10px;
+}
+
+.shelf-product-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: #e2e8f0;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shelf-product-price {
+  font-size: 13px;
+  font-weight: 700;
+  color: #06b6d4;
+}
+
+/* ===== PRODUCTS GRID ===== */
+.sports-products-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  padding: 0 40px;
+}
+
+.sports-product-item {
+  transition: transform 0.3s ease;
+}
+
+.sports-product-item:hover {
+  transform: translateY(-4px);
+}
+
+/* ===== PRODUCTS HEADER ===== */
+.products-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  margin-bottom: 24px;
+}
+
+.products-count {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.products-count span {
+  color: #06b6d4;
+  font-weight: 600;
+}
+
+/* ===== SEARCH & SORT BAR ===== */
+.sports-tools-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 40px;
+    margin-bottom: 32px;
+}
+
+.sports-search {
+    position: relative;
+    flex: 1;
+    max-width: 320px;
+}
+
+.sports-search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.sports-search-input {
     width: 100%;
-    min-width: unset;
-    margin-right: 0;
-    position: static;
-    max-height: none;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 14px;
-  }
+    padding: 12px 16px 12px 42px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    color: #ffffff;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
 
-  .sidebar-section {
-    flex: 1 1 calc(50% - 4px);
-    min-width: 200px;
-  }
+.sports-search-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
 
-  .sidebar-section-body {
-    max-height: 300px;
+.sports-search-input:focus {
+    outline: none;
+    border-color: #06b6d4;
+    background: rgba(6, 182, 212, 0.05);
+}
+
+.sports-sort {
+    margin-left: auto;
+}
+
+.sports-sort-select {
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    color: #ffffff;
+    font-size: 13px;
+    cursor: pointer;
+    min-width: 180px;
+}
+
+.sports-sort-select:focus {
+    outline: none;
+    border-color: #06b6d4;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+    .sports-tools-bar {
+        padding: 0 20px;
+        flex-wrap: wrap;
+    }
+
+    .sports-search {
+        max-width: 100%;
+        flex: 1 1 100%;
+    }
+
+    .sports-sort {
+        margin-left: 0;
+    }
+
+    .sports-sort-select {
+        flex: 1;
+    }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1200px) {
+  .sports-products-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
-@media (max-width: 500px) {
-  .sidebar-sportsEquipment {
-    padding: 10px;
-    gap: 6px;
+@media (max-width: 900px) {
+  .sports-tabs {
+    padding: 0 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
 
-  .sidebar-section {
-    flex: 1 1 100%;
+  .sports-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sports-tab {
+    flex-shrink: 0;
+    padding: 14px 20px;
+    font-size: 13px;
+  }
+
+  .filter-chips-bar {
+    padding: 0 20px;
+  }
+
+  .interactive-shelf {
+    padding: 0 20px;
+  }
+
+  .sports-products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 0 20px;
+  }
+
+  .products-header {
+    padding: 0 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .sports-products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .shelf-group {
+    min-width: 260px;
   }
 }

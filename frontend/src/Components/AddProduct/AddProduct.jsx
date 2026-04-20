@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import './AddProduct.css';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import API_BASE_URL from '../../config';
+import { ShopContext } from '../../Context/ShopContext';
 
 export const AddProduct = () => {
     const navigate = useNavigate();
+    const { fetchProducts } = useContext(ShopContext);
     const [images, setImages] = useState([]);
     const [customCategories, setCustomCategories] = useState([]);
     const [productDetails, setProductDetails] = useState({
@@ -92,6 +94,7 @@ export const AddProduct = () => {
             });
             if (response.data.success) {
                 toast.success('Product added successfully!');
+                if (fetchProducts) fetchProducts();
                 setProductDetails({
                     name: '', image: '', detailedCategory: 'Club Jerseys',
                     generalCategory: 'Men', new_price: '', old_price: '', description: '',

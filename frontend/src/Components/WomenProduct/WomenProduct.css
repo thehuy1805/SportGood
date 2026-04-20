@@ -1,0 +1,131 @@
+.women-product-container {
+    width: 100%;
+}
+
+/* ===== FEATURED CAROUSEL ===== */
+.featured-carousel {
+    margin-bottom: 48px;
+}
+
+.carousel-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 0 4px;
+}
+
+.carousel-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.carousel-subtitle {
+    font-size: 14px;
+    color: #9ca3af;
+    font-weight: 400;
+}
+
+.carousel-track {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding: 8px 4px 16px;
+}
+
+.carousel-track::-webkit-scrollbar {
+    display: none;
+}
+
+.carousel-item {
+    flex-shrink: 0;
+    width: 260px;
+    scroll-snap-align: start;
+}
+
+/* ===== PRODUCTS GRID ===== */
+.products-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.products-count {
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.products-count span {
+    color: #ec4899;
+    font-weight: 600;
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+}
+
+.product-item.featured {
+    grid-column: span 2;
+}
+
+/* ===== NO PRODUCTS ===== */
+.no-products {
+    text-align: center;
+    padding: 80px 20px;
+    color: #9ca3af;
+}
+
+.no-products-icon {
+    font-size: 48px;
+    display: block;
+    margin-bottom: 16px;
+}
+
+.no-products p {
+    font-size: 16px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1200px) {
+    .products-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+
+    .product-item.featured {
+        grid-column: span 2;
+    }
+
+    .carousel-item {
+        width: 220px;
+    }
+}
+
+@media (max-width: 600px) {
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .product-item.featured {
+        grid-column: span 2;
+    }
+
+    .carousel-item {
+        width: 180px;
+    }
+}

@@ -1,138 +1,216 @@
 /* ============================================================
-   MEN PAGE — Premium Dark Sidebar Design
+   MEN PAGE — Power & Performance Layout
+   Dark, Tech, Athletic
    ============================================================ */
 
 .men-container {
   display: flex;
   flex-direction: column;
-}
-
-.men-banner {
-  max-width: 100%;
-  height: auto;
-  display: contents;
+  background: #0a0a14;
+  min-height: 100vh;
 }
 
 .men-content {
   display: flex;
-  margin-top: 24px;
-  min-height: calc(100vh - 200px);
+  gap: 0;
+  padding: 40px 0;
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
 }
 
-/* ---------- Sidebar ---------- */
+/* ===== SIDEBAR - 18% width ===== */
 .sidebar-men {
-  width: 280px;
-  min-width: 280px;
-  margin-right: 24px;
-  background: var(--nav-bg);
-  border-radius: 16px;
-  padding: 20px 16px;
-  border: 1px solid var(--nav-border);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  width: 18%;
+  min-width: 200px;
+  max-width: 280px;
+  padding: 0 24px;
   position: sticky;
-  top: 88px;
+  top: 100px;
   align-self: flex-start;
-  max-height: calc(100vh - 110px);
+  max-height: calc(100vh - 120px);
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: rgba(249, 115, 22, 0.3) transparent;
+  scrollbar-color: rgba(0, 245, 255, 0.2) transparent;
 }
 
 .sidebar-men::-webkit-scrollbar {
-  width: 4px;
-}
-
-.sidebar-men::-webkit-scrollbar-track {
-  background: transparent;
+  width: 3px;
 }
 
 .sidebar-men::-webkit-scrollbar-thumb {
-  background: rgba(249, 115, 22, 0.3);
-  border-radius: 4px;
+  background: rgba(0, 245, 255, 0.2);
+  border-radius: 3px;
 }
 
-/* ---------- Section Card ---------- */
-.sidebar-section {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
-  padding: 14px 16px;
-  transition: border-color 0.25s ease;
-}
-
-.sidebar-section:hover {
-  border-color: rgba(249, 115, 22, 0.2);
-}
-
-/* ---------- Section Header ---------- */
-.sidebar-section-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.sidebar-section-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: rgba(249, 115, 22, 0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--nav-accent);
-  flex-shrink: 0;
-  transition: background 0.25s ease;
-}
-
-.sidebar-section:hover .sidebar-section-icon {
-  background: rgba(249, 115, 22, 0.2);
-}
-
-.sidebar-section-title {
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  color: #e2e8f0;
-  text-transform: uppercase;
-  flex: 1;
-}
-
-.sidebar-section-arrow {
-  color: var(--nav-text-muted);
-  transition: transform 0.25s ease, color 0.25s ease;
-  display: flex;
-  align-items: center;
-}
-
-.sidebar-section.collapsed .sidebar-section-arrow {
-  transform: rotate(-90deg);
-  color: var(--nav-accent);
-}
-
-/* ---------- Section Body ---------- */
-.sidebar-section-body {
-  overflow: hidden;
-  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
-  max-height: 400px;
-  opacity: 1;
-}
-
-.sidebar-section.collapsed .sidebar-section-body {
-  max-height: 0;
-  opacity: 0;
-}
-
-/* ---------- Main Content ---------- */
+/* ===== MAIN CONTENT - 82% width ===== */
 .main-content {
   flex: 1;
   min-width: 0;
+  padding: 0 32px;
 }
 
-/* ---------- Responsive ---------- */
+/* Top Performance Picks - Horizontal Scroll */
+.top-picks-section {
+  margin-bottom: 40px;
+}
+
+.top-picks-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.top-picks-title {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.top-picks-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.nav-btn {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.nav-btn:hover {
+  background: rgba(0, 245, 255, 0.1);
+  border-color: #00f5ff;
+  color: #00f5ff;
+}
+
+.top-picks-scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding-bottom: 8px;
+}
+
+.top-picks-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.top-pick-item {
+  flex-shrink: 0;
+  width: 200px;
+  scroll-snap-align: start;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.top-pick-item:hover {
+  border-color: #00f5ff;
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0, 245, 255, 0.15);
+}
+
+.top-pick-image {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.top-pick-info {
+  padding: 12px;
+}
+
+.top-pick-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.top-pick-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: #00f5ff;
+}
+
+/* Products Header */
+.products-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.products-count {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.products-count span {
+  color: #00f5ff;
+  font-weight: 600;
+}
+
+.products-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sort-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.sort-select {
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.sort-select:focus {
+  outline: none;
+  border-color: #00f5ff;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1200px) {
+  .sidebar-men {
+    width: 22%;
+    min-width: 180px;
+  }
+
+  .main-content {
+    padding: 0 24px;
+  }
+}
+
 @media (max-width: 900px) {
   .men-content {
     flex-direction: column;
@@ -140,33 +218,27 @@
 
   .sidebar-men {
     width: 100%;
+    max-width: none;
     min-width: unset;
-    margin-right: 0;
+    padding: 0 20px;
     position: static;
     max-height: none;
-    flex-direction: row;
+    display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    padding: 14px;
+    gap: 16px;
   }
 
-  .sidebar-section {
-    flex: 1 1 calc(50% - 4px);
-    min-width: 200px;
-  }
-
-  .sidebar-section-body {
-    max-height: 300px;
+  .main-content {
+    padding: 0 20px;
   }
 }
 
 @media (max-width: 500px) {
-  .sidebar-men {
-    padding: 10px;
-    gap: 6px;
+  .top-pick-item {
+    width: 160px;
   }
 
-  .sidebar-section {
-    flex: 1 1 100%;
+  .top-pick-image {
+    height: 110px;
   }
 }

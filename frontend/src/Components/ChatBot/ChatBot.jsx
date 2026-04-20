@@ -186,8 +186,17 @@ const ChatBot = () => {
                                         <div className="message-avatar">
                                             {msg.role === 'user' ? <User size={18} /> : <Bot size={18} />}
                                         </div>
-                                        <div className="message-content">
-                                            <p>{msg.content}</p>
+                                        <div
+                                            className="message-content"
+                                            style={{
+                                                background: msg.role === 'user'
+                                                    ? 'linear-gradient(135deg, #ff6b35 0%, #ff4757 100%)'
+                                                    : '#ffffff',
+                                                color: msg.role === 'user' ? '#fff' : '#1a1a1a',
+                                                border: msg.role === 'assistant' ? '1px solid #ddd' : 'none',
+                                            }}
+                                        >
+                                            <p style={{ color: 'inherit' }}>{msg.content}</p>
                                             <span className="message-time">{formatTime(msg.timestamp)}</span>
                                         </div>
                                     </div>

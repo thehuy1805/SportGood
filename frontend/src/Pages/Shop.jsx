@@ -22,7 +22,7 @@ export const Shop = () => {
             width="560"
             height="315"
             src="https://player.vimeo.com/video/95380310?h=9f8101bf3a"
-            
+
             title="YouTube video player"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

@@ -54,7 +54,13 @@ const ProductDisplay = ({ product, feedbacks }) => {
   };
 
   const getSeEntry = () => {
-    return sizeStatusMap['__se__'] || { status: 'available', remainingQuantity: null };
+    if (sizeStatusMap['__se__']) {
+      return sizeStatusMap['__se__'];
+    }
+    return {
+      status: product.stock === 0 ? 'out_of_stock' : (product.stock > 0 ? 'available' : 'out_of_stock'),
+      remainingQuantity: product.stock || 0
+    };
   };
 
   const isSizeDisabled = (size) => {
@@ -106,10 +112,20 @@ const ProductDisplay = ({ product, feedbacks }) => {
     if (isSports) {
       const se = getSeEntry();
       if (se.status === 'out_of_stock') return true;
-      if (se.status === 'low_stock') return se.remainingQuantity <= 0;
-      return product.stock <= 0;
+      if (se.status === 'low_stock') {
+        const qty = se.remainingQuantity ?? 0;
+        return qty <= 0;
+      }
+      return false;
     }
-    return !selectedSize;
+    if (!selectedSize) return true;
+    const entry = getSizeEntry(selectedSize);
+    if (entry.status === 'out_of_stock') return true;
+    if (entry.status === 'low_stock') {
+      const qty = entry.remainingQuantity ?? 0;
+      return qty <= 0;
+    }
+    return false;
   };
 
   const renderStockInformation = () => {
@@ -131,12 +147,8 @@ const ProductDisplay = ({ product, feedbacks }) => {
           </div>
         );
       }
-      return (
-        <div className="pd-stock-badge">
-          <Package size={14} />
-          <span>In stock: <strong>{product.stock}</strong></span>
-        </div>
-      );
+      // Only show badge for low_stock or out_of_stock — available products show no stock badge
+      return null;
     }
     return null;
   };

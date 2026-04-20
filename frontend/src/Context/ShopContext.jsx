@@ -18,34 +18,19 @@ export const ShopContextProvider = ({ children }) => {
     // Kết nối Socket.IO
     const socket = io(API_BASE_URL);
 
-    // Lấy tất cả sản phẩm
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const productsResponse = await fetch(`${API_BASE_URL}/allproducts`);
-                const productsData = await productsResponse.json();
-                setAll_product(productsData);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
+    // Lấy tất cả sản phẩm (cũng dùng để refresh khi cần)
+    const fetchProducts = async () => {
+        try {
+            const productsResponse = await fetch(`${API_BASE_URL}/allproducts`);
+            const productsData = await productsResponse.json();
+            setAll_product(productsData);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
 
-        fetchData();
-    }, []);
-
-    // Socket: làm mới all_product khi nhân viên cập nhật kho
     useEffect(() => {
-        const refreshProducts = async () => {
-            try {
-                const res = await fetch(`${API_BASE_URL}/allproducts`);
-                const data = await res.json();
-                setAll_product(data);
-            } catch (err) {
-                console.error('Socket refresh error:', err);
-            }
-        };
-        socket.on('categoriesUpdated', refreshProducts);
-        return () => { socket.off('categoriesUpdated', refreshProducts); };
+        fetchProducts();
     }, []);
 
     // Lưu giỏ hàng vào localStorage khi giỏ hàng thay đổi
@@ -459,6 +444,7 @@ const removeFromCart = (itemId, size) => {
         toggleWishlist,
         isInWishlist,
         getWishlistCount,
+        fetchProducts,
     };
 
     return (

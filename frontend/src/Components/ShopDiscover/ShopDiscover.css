@@ -1,0 +1,19 @@
+/* ============================================================
+   SHOP DISCOVER — Main Container
+   ============================================================ */
+
+.shop-discover {
+    width: 100%;
+    min-height: 100vh;
+    background: #0a0a0a;
+}
+
+/* ===== Staggered entrance animations ===== */
+.shop-discover > * {
+    animation: sectionReveal 0.6s ease both;
+}
+
+@keyframes sectionReveal {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}

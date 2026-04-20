@@ -78,8 +78,10 @@ const CartItems = () => {
         }
 
         if (product.generalCategory === 'Sports Equipment') {
+            if (status === 'out_of_stock') return 0;
             if (status === 'low_stock' && remainingQty !== null) return remainingQty;
-            return product.stock || 0;
+            // available: no stock cap — return null (unlimited)
+            return null;
         }
         // Clothes / Shoes: unlimited unless low_stock
         if (status === 'low_stock' && remainingQty !== null) return remainingQty;

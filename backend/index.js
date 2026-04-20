@@ -241,10 +241,9 @@ app.use((req, res, next) => {
                 }
                 const defaultSizeStatus = {};
                 sizes.forEach(s => { defaultSizeStatus[s] = { status: 'available', remainingQuantity: null }; });
-
-                console.log('Creating product with id:', id);
-                console.log('mainImage:', mainImage);
-                console.log('sizes:', sizes);
+                if (generalCategory === 'Sports Equipment') {
+                    defaultSizeStatus['__se__'] = { status: 'available', remainingQuantity: null };
+                }
 
                 const product = new Product({
                     id: id,
@@ -354,11 +353,15 @@ app.use((req, res, next) => {
         });
 
         app.get('/products/:category', async (req, res) => {
-            const category = req.params.category;
+            const param = req.params.category;
             try {
-            // Truy vấn database để lấy sản phẩm theo danh mục
-
-            const products = await Product.find({ category }); 
+            // param có thể là detailedCategory (e.g. 'soccer-shoes') hoặc generalCategory
+            const products = await Product.find({
+                $or: [
+                    { detailedCategory: { $regex: param, $options: 'i' } },
+                    { generalCategory: { $regex: param, $options: 'i' } },
+                ]
+            });
             res.json(products);
             } catch (error) {
             res.status(500).json({ error: 'Internal Server Error'
@@ -1157,21 +1160,37 @@ app.get('/product/:productName', async (req, res) => {
 // Endpoint cập nhật giỏ hàng
 app.put('/updatecart', fetchUser, async (req, res) => {
     try {
-        const { cart } = req.body; 
+        const { cart } = req.body;
+
+        // Validate cart structure and sanitize values
+        const sanitizedCart = {};
+        if (cart && typeof cart === 'object') {
+            for (const productId of Object.keys(cart)) {
+                if (!cart[productId] || typeof cart[productId] !== 'object') continue;
+                sanitizedCart[productId] = {};
+                for (const size of Object.keys(cart[productId])) {
+                    const qty = Number(cart[productId][size]);
+                    if (!isNaN(qty) && qty > 0) {
+                        sanitizedCart[productId][size] = qty;
+                    }
+                }
+            }
+        }
+
         const user = await Users.findOneAndUpdate(
-            { _id: req.user.id }, 
-            { 
-                $set: { 
-                    cartData: Object.keys(cart).flatMap(productId => 
-                        Object.keys(cart[productId]).map(size => ({
-                            productId: productId, 
-                            size: size, 
-                            quantity: cart[productId][size] 
+            { _id: req.user.id },
+            {
+                $set: {
+                    cartData: Object.keys(sanitizedCart).flatMap(productId =>
+                        Object.keys(sanitizedCart[productId]).map(size => ({
+                            productId: productId,
+                            size: size,
+                            quantity: sanitizedCart[productId][size]
                         }))
-                    ) 
-                } 
-            }, 
-            { new: true, runValidators: true } 
+                    )
+                }
+            },
+            { new: true, runValidators: true }
         );
 
         if (!user) {
@@ -1394,8 +1413,19 @@ app.post('/checkout', fetchUser, async (req, res) => {
 
             // Kiểm tra tồn kho trước khi thanh toán
             if (productData.generalCategory === 'Sports Equipment') {
-                if (productData.stock < product.quantity) {
-                    throw new Error(`Insufficient stock for Sports Equipment: ${productData.name}`);
+                // Trust __se__ status for Sports Equipment (set via inventory management)
+                const sizeStatusObj = productData.sizeStatus
+                    ? (productData.sizeStatus instanceof Map
+                        ? Object.fromEntries(productData.sizeStatus)
+                        : productData.sizeStatus)
+                    : {};
+                const se = sizeStatusObj['__se__'];
+
+                if (!se || se.status === 'out_of_stock') {
+                    throw new Error(`Product "${productData.name}" is currently out of stock`);
+                }
+                if (se.status === 'low_stock' && se.remainingQuantity !== null && se.remainingQuantity < product.quantity) {
+                    throw new Error(`Not enough stock for "${productData.name}". Only ${se.remainingQuantity} left.`);
                 }
             }
 
@@ -1405,7 +1435,8 @@ app.post('/checkout', fetchUser, async (req, res) => {
                 quantity: product.quantity,
                 price: productData.new_price,
                 size: product.size,
-                name: productData.name  // Thêm tên sản phẩm để debug dễ hơn
+                name: productData.name,
+                generalCategory: productData.generalCategory
             };
         }));
 
@@ -1428,39 +1459,61 @@ app.post('/checkout', fetchUser, async (req, res) => {
         const updatedProducts = [];
 
         for (let product of orderProducts) {
-            let updatedProduct;
-            
-            // Giảm tồn kho (sử dụng transaction)
-            updatedProduct = await Product.findOneAndUpdate(
-                { id: product.productId },
-                { $inc: { stock: -product.quantity } },
-                { new: true, session }
-            );
-
-            // Tự động cập nhật sizeStatus nếu sản phẩm có kích thước
-            if (product.size && product.size !== 'default' && updatedProduct.sizeStatus instanceof Map) {
-                const ss = updatedProduct.sizeStatus.get(product.size);
-                if (ss && ss.remainingQuantity !== null) {
-                    const newQty = Math.max(0, ss.remainingQuantity - product.quantity);
-                    const newStatus = newQty === 0 ? 'out_of_stock' : 'low_stock';
-                    await Product.findOneAndUpdate(
-                        { id: product.productId },
-                        { $set: { [`sizeStatus.${product.size}.remainingQuantity`]: newQty, [`sizeStatus.${product.size}.status`]: newStatus } },
-                        { session }
-                    );
-                    updatedProduct.sizeStatus.set(product.size, { ...ss, remainingQuantity: newQty, status: newStatus });
-                }
+            // Re-fetch product inside loop (productData from outer Promise.all closure is stale)
+            const pd = await Product.findOne({ id: product.productId }).session(session);
+            if (!pd) {
+                throw new Error(`Failed to update product: ${product.name}`);
             }
 
-            // Kiểm tra updatedProduct trước khi thêm vào
-            if (!updatedProduct) {
-                throw new Error(`Failed to update product: ${product.name}`);
+            let updatedProduct;
+            if (pd.generalCategory === 'Sports Equipment') {
+                // Sports Equipment: update __se__ remainingQuantity
+                const sizeStatusObj = pd.sizeStatus
+                    ? (pd.sizeStatus instanceof Map
+                        ? Object.fromEntries(pd.sizeStatus)
+                        : pd.sizeStatus)
+                    : {};
+                const se = sizeStatusObj['__se__'];
+
+                if (se && se.remainingQuantity !== null) {
+                    const newQty = Math.max(0, se.remainingQuantity - product.quantity);
+                    const newStatus = newQty === 0 ? 'out_of_stock' : 'available';
+                    await Product.findOneAndUpdate(
+                        { id: product.productId },
+                        { $set: { 'sizeStatus.__se__': { status: newStatus, remainingQuantity: newQty } } },
+                        { new: true, session }
+                    );
+                }
+                updatedProduct = await Product.findOne({ id: product.productId }).session(session);
+            } else {
+                // Clothes / Shoes: decrement stock field
+                updatedProduct = await Product.findOneAndUpdate(
+                    { id: product.productId },
+                    { $inc: { stock: -product.quantity } },
+                    { new: true, session }
+                );
+                // Also update sizeStatus remainingQuantity for clothes/shoes
+                if (product.size && product.size !== 'default' && updatedProduct.sizeStatus instanceof Map) {
+                    const ss = updatedProduct.sizeStatus.get(product.size);
+                    if (ss && ss.remainingQuantity !== null) {
+                        const newQty = Math.max(0, ss.remainingQuantity - product.quantity);
+                        const newStatus = newQty === 0 ? 'out_of_stock' : 'low_stock';
+                        await Product.findOneAndUpdate(
+                            { id: product.productId },
+                            { $set: { [`sizeStatus.${product.size}.remainingQuantity`]: newQty, [`sizeStatus.${product.size}.status`]: newStatus } },
+                            { session }
+                        );
+                        updatedProduct.sizeStatus.set(product.size, { ...ss, remainingQuantity: newQty, status: newStatus });
+                    }
+                }
             }
 
             updatedProducts.push({
                 id: updatedProduct.id,
                 stock: updatedProduct.stock,
-                sizeStatus: Object.fromEntries(updatedProduct.sizeStatus || new Map()),
+                sizeStatus: updatedProduct.sizeStatus instanceof Map
+                    ? Object.fromEntries(updatedProduct.sizeStatus)
+                    : (updatedProduct.sizeStatus || {}),
                 generalCategory: updatedProduct.generalCategory,
                 name: updatedProduct.name
             });
