@@ -13,7 +13,10 @@ const http = require('http');
 const socketIo = require('socket.io');
 const fetch = require('node-fetch');
 const Message = require('./models/Message');
-// Cấu hình Cloudinary
+
+// ============================================================
+// CLOUDINARY CONFIG
+// ============================================================
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
@@ -613,7 +616,11 @@ app.get('/getProductsByCategory', async (req, res) => {
             passwordChangedAt: {
                 type: Date,
                 default: null
-            }
+            },
+            completedChallenges: [{
+                challengeId: { type: mongoose.Schema.Types.ObjectId, ref: 'Challenge' },
+                completedAt: { type: Date, default: Date.now }
+            }]
         });
         const Users = mongoose.model('Users', userSchema);
         
@@ -901,6 +908,182 @@ app.get('/product/:productName', async (req, res) => {
                 }
             }
         }
+
+        // ============================================================
+        // CHALLENGE MODEL & SEED DATA
+        // ============================================================
+        const challengeSchema = new mongoose.Schema({
+            name: { type: String, required: true },
+            duration: { type: String, required: true },
+            difficulty: { type: String, enum: ['Beginner', 'Intermediate', 'Advanced'], required: true },
+            icon: { type: String, required: true },
+            color: { type: String, required: true },
+            items: [{
+                productId: { type: Number, required: true },
+                name: { type: String, required: true },
+                price: { type: Number, required: true }
+            }],
+            total: { type: Number, required: true },
+            bundlePrice: { type: Number, required: true },
+            active: { type: Boolean, default: true },
+            date: { type: Date, default: Date.now }
+        });
+
+        const Challenge = mongoose.model('Challenge', challengeSchema);
+
+        // Seed challenges if none exist
+        const seedChallenges = async () => {
+            const count = await Challenge.countDocuments();
+            if (count === 0) {
+                const defaultChallenges = [
+                    {
+                        name: 'Full Leg Day Kit',
+                        duration: '45 min',
+                        difficulty: 'Advanced',
+                        icon: '🦵',
+                        color: '#06b6d4',
+                        items: [
+                            { productId: 1, name: 'Resistance Bands Set', price: 29 },
+                            { productId: 2, name: 'Ankle Weights 5lb', price: 35 },
+                            { productId: 3, name: 'Compression Leggings', price: 59 },
+                            { productId: 4, name: 'Training Shoes', price: 89 },
+                        ],
+                        total: 212,
+                        bundlePrice: 179,
+                        active: true
+                    },
+                    {
+                        name: 'Upper Body Blast',
+                        duration: '30 min',
+                        difficulty: 'Intermediate',
+                        icon: '💪',
+                        color: '#a855f7',
+                        items: [
+                            { productId: 5, name: 'Dumbbell Set 20lb', price: 45 },
+                            { productId: 6, name: 'Wrist Wraps', price: 15 },
+                            { productId: 7, name: 'Tank Top Pro', price: 35 },
+                            { productId: 8, name: 'Gym Gloves', price: 22 },
+                        ],
+                        total: 117,
+                        bundlePrice: 99,
+                        active: true
+                    },
+                    {
+                        name: 'HIIT Cardio Pack',
+                        duration: '20 min',
+                        difficulty: 'Beginner',
+                        icon: '🔥',
+                        color: '#f43f5e',
+                        items: [
+                            { productId: 9, name: 'Jump Rope Speed', price: 18 },
+                            { productId: 10, name: 'Foam Roller', price: 28 },
+                            { productId: 11, name: 'Breathable Shorts', price: 38 },
+                            { productId: 12, name: 'Running Cap', price: 25 },
+                        ],
+                        total: 109,
+                        bundlePrice: 89,
+                        active: true
+                    }
+                ];
+                await Challenge.insertMany(defaultChallenges);
+                console.log('Default challenges seeded successfully');
+            }
+        };
+
+        // Challenge API Endpoints
+        app.get('/api/challenges', async (req, res) => {
+            try {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                const challenges = await Challenge.find({ active: true }).lean();
+
+                // Add dynamic date info
+                const challengesWithMeta = challenges.map((c, index) => ({
+                    ...c,
+                    dayKey: `day_${(today.getTime() / 86400000) % challenges.length}`,
+                    rotationIndex: (today.getDate() + index) % challenges.length
+                }));
+
+                res.json({ success: true, challenges: challengesWithMeta });
+            } catch (error) {
+                console.error('Error fetching challenges:', error);
+                res.status(500).json({ success: false, error: 'Failed to fetch challenges' });
+            }
+        });
+
+        // Get user's completed challenges
+        app.get('/api/challenges/completed', fetchUser, async (req, res) => {
+            try {
+                const user = await Users.findById(req.user.id).select('completedChallenges').lean();
+                res.json({ success: true, completedChallenges: user?.completedChallenges || [] });
+            } catch (error) {
+                console.error('Error fetching completed challenges:', error);
+                res.status(500).json({ success: false, error: 'Failed to fetch completed challenges' });
+            }
+        });
+
+        // Complete a challenge (mark as done, add all products to cart)
+        app.post('/api/challenges/:id/complete', fetchUser, async (req, res) => {
+            try {
+                const challengeId = req.params.id;
+                const { addToCart = true } = req.body;
+
+                const challenge = await Challenge.findById(challengeId);
+                if (!challenge) {
+                    return res.status(404).json({ success: false, error: 'Challenge not found' });
+                }
+
+                // Add to user's completed list
+                const user = await Users.findById(req.user.id);
+                if (!user.completedChallenges) {
+                    user.completedChallenges = [];
+                }
+
+                const alreadyCompleted = user.completedChallenges.some(
+                    cc => cc.challengeId.toString() === challengeId
+                );
+
+                if (!alreadyCompleted) {
+                    user.completedChallenges.push({
+                        challengeId: challenge._id,
+                        completedAt: new Date()
+                    });
+                    await user.save();
+                }
+
+                // Add all challenge products to cart
+                if (addToCart) {
+                    for (const item of challenge.items) {
+                        const effectiveSize = 'default';
+
+                        const existingCartItem = user.cartData.find(
+                            ci => ci.productId === item.productId && ci.size === effectiveSize
+                        );
+
+                        if (existingCartItem) {
+                            existingCartItem.quantity += 1;
+                        } else {
+                            user.cartData.push({
+                                productId: item.productId,
+                                size: effectiveSize,
+                                quantity: 1
+                            });
+                        }
+                    }
+                    await user.save();
+                }
+
+                res.json({
+                    success: true,
+                    message: alreadyCompleted ? 'Challenge already completed' : 'Challenge completed! Products added to cart.',
+                    alreadyCompleted
+                });
+            } catch (error) {
+                console.error('Error completing challenge:', error);
+                res.status(500).json({ success: false, error: 'Failed to complete challenge' });
+            }
+        });
 
         // API để lấy thông tin người dùng
 
@@ -2520,6 +2703,7 @@ async function startServer() {
     try {
         await mongoose.connect(mongoUri);
         console.log('MongoDB connected.');
+        await seedChallenges();
         server.listen(port, () => {
             console.log('Server Running on Port: ' + port);
             console.log('Chatbot: POST .../api/chat | Health: GET .../api/chat/health');
